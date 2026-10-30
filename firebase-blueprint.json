@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "Accounting closing task or ad-hoc obligation tracked across 40 company branches.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique task identifier",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "code": {
+          "type": "string",
+          "description": "Task short code (e.g., CTB-01, AVU-01)",
+          "maxLength": 32
+        },
+        "title": {
+          "type": "string",
+          "description": "Task title or reconciliation description",
+          "maxLength": 500
+        },
+        "topic": {
+          "type": "string",
+          "description": "Accounting topic classification",
+          "maxLength": 120
+        },
+        "accountingType": {
+          "type": "string",
+          "description": "Accounting standard (Societário, IFRS, Fiscal)",
+          "maxLength": 64
+        },
+        "category": {
+          "type": "string",
+          "description": "Task category (FECHAMENTO or AVULSA)",
+          "enum": ["FECHAMENTO", "AVULSA"],
+          "maxLength": 32
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Due date in YYYY-MM-DD format",
+          "maxLength": 32
+        },
+        "assignee": {
+          "type": "string",
+          "description": "Assigned team member name",
+          "maxLength": 64
+        },
+        "originalAssignee": {
+          "type": "string",
+          "description": "Original assigned team member name",
+          "maxLength": 64
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "Reviewer name (RACI)",
+          "maxLength": 64
+        },
+        "status": {
+          "type": "string",
+          "description": "Current task status",
+          "enum": ["PENDENTE", "EM_ANDAMENTO", "PAUSADA", "AGUARDANDO_DEPENDENCIA", "CONCLUIDA"],
+          "maxLength": 40
+        },
+        "isCritical": {
+          "type": "boolean",
+          "description": "Whether the task is on the critical path"
+        },
+        "totalSeconds": {
+          "type": "number",
+          "description": "Total accumulated time in seconds"
+        },
+        "evidenceUrl": {
+          "type": "string",
+          "description": "Network path or URL for task evidence",
+          "maxLength": 500
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the last modifier/owner",
+          "maxLength": 128
+        }
+      },
+      "required": ["id", "code", "title", "status", "assignee"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Audit trail entry for timer starts, pauses, transfers, completions, and comments.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique log identifier",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp of the event",
+          "maxLength": 64
+        },
+        "user": {
+          "type": "string",
+          "description": "Operator who performed the action",
+          "maxLength": 64
+        },
+        "targetUser": {
+          "type": "string",
+          "description": "Target mentioned or transferred operator",
+          "maxLength": 64
+        },
+        "taskCode": {
+          "type": "string",
+          "description": "Associated task code",
+          "maxLength": 32
+        },
+        "taskTitle": {
+          "type": "string",
+          "description": "Associated task title",
+          "maxLength": 500
+        },
+        "companyScope": {
+          "type": "string",
+          "description": "Branches affected by the action",
+          "maxLength": 200
+        },
+        "type": {
+          "type": "string",
+          "description": "Action type",
+          "maxLength": 64
+        },
+        "details": {
+          "type": "string",
+          "description": "Human-readable audit description",
+          "maxLength": 2000
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the operator",
+          "maxLength": 128
+        }
+      },
+      "required": ["id", "timestamp", "user", "taskCode", "type", "details"]
+    }
+  },
+  "firestore": {
+    "/tasks_10_2026/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Accounting tasks for competency 10/2026 across 40 branches"
+    },
+    "/logs_10_2026/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Audit trail logs for competency 10/2026"
+    }
+  }
+}

@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Primitives & Helpers
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'roogerio99@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidTask(data) {
+      return data.keys().hasAll(['id', 'code', 'title', 'status', 'assignee', 'ownerUid']) &&
+        data.keys().hasOnly([
+          'id', 'code', 'title', 'topic', 'accountingType', 'category', 'dueDate',
+          'assignee', 'originalAssignee', 'reviewer', 'status', 'isCritical',
+          'totalSeconds', 'timerStartedAt', 'activeTimerUser', 'activeTimerScope',
+          'activeTimerBranches', 'pauseReason', 'dependencyInfo', 'branches',
+          'branchDetails', 'checklistKey', 'checklistState', 'timeByUser',
+          'evidenceUrl', 'comments', 'completedAt', 'completedBy', 'ownerUid'
+        ]) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.code is string && data.code.size() >= 1 && data.code.size() <= 32 &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 500 &&
+        data.assignee is string && data.assignee.size() >= 1 && data.assignee.size() <= 64 &&
+        data.status is string && data.status.size() <= 40 &&
+        data.status in ['PENDENTE', 'EM_ANDAMENTO', 'PAUSADA', 'AGUARDANDO_DEPENDENCIA', 'CONCLUIDA'] &&
+        data.ownerUid is string && data.ownerUid.size() <= 128 &&
+        data.ownerUid == request.auth.uid;
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['id', 'timestamp', 'user', 'taskCode', 'type', 'details', 'ownerUid']) &&
+        data.keys().hasOnly([
+          'id', 'timestamp', 'user', 'targetUser', 'taskCode', 'taskTitle',
+          'companyScope', 'type', 'details', 'durationSeconds', 'ownerUid'
+        ]) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.timestamp is string && data.timestamp.size() >= 1 && data.timestamp.size() <= 64 &&
+        data.user is string && data.user.size() >= 1 && data.user.size() <= 64 &&
+        data.taskCode is string && data.taskCode.size() >= 1 && data.taskCode.size() <= 32 &&
+        data.type is string && data.type.size() >= 1 && data.type.size() <= 64 &&
+        data.details is string && data.details.size() >= 1 && data.details.size() <= 2000 &&
+        data.ownerUid is string && data.ownerUid.size() <= 128 &&
+        data.ownerUid == request.auth.uid;
+    }
+
+    // 3. Collection Rules: /tasks_10_2026/{taskId}
+    match /tasks_10_2026/{taskId} {
+      allow get: if isSignedIn() && isValidId(taskId) && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidId(taskId) && isValidTask(incoming()) && incoming().id == taskId;
+      allow update: if isSignedIn() && isValidId(taskId) && isValidTask(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().code == existing().code &&
+        (existing().ownerUid == request.auth.uid || isAdmin()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'topic', 'accountingType', 'category', 'dueDate',
+          'assignee', 'originalAssignee', 'reviewer', 'status', 'isCritical',
+          'totalSeconds', 'timerStartedAt', 'activeTimerUser', 'activeTimerScope',
+          'activeTimerBranches', 'pauseReason', 'dependencyInfo', 'branches',
+          'branchDetails', 'checklistKey', 'checklistState', 'timeByUser',
+          'evidenceUrl', 'comments', 'completedAt', 'completedBy', 'ownerUid'
+        ]);
+      allow delete: if isSignedIn() && isValidId(taskId) && (existing().ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // 4. Collection Rules: /logs_10_2026/{logId}
+    match /logs_10_2026/{logId} {
+      allow get: if isSignedIn() && isValidId(logId) && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidId(logId) && isValidAuditLog(incoming()) && incoming().id == logId;
+      allow update: if false;
+      allow delete: if isAdmin() && isValidId(logId);
+    }
+
+    // 5. Admins lookup collection
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && request.auth.uid == adminId;
+      allow list, create, update, delete: if false;
+    }
+  }
+}
