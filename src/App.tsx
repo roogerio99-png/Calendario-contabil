@@ -4415,7 +4415,7 @@ export default function App() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-white">
-                  Agriconnection • Gestão & Time Tracking Contábil
+                  Task Account — Gestão de Tarefas de Controladoria
                 </h1>
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-extrabold border ${
@@ -4449,13 +4449,6 @@ export default function App() {
                   </button>
                 )}
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {activeRoleView === 'ADMINISTRADOR'
-                  ? 'Governança Global • Parametrização do Catálogo Mestre, Gestão de Usuários (Admin/Coord/Analista) e Auditoria'
-                  : activeRoleView === 'COORDENADOR'
-                  ? 'Supervisão de Fechamento • Monitoramento de Cronômetros, Distribuição de Carga, Dependências (@) e 40 Filiais'
-                  : `Estação Operacional de @${currentUser} • Execução de Checklist, Apontamento de Horas e Controle por Filial`}
-              </p>
             </div>
           </div>
 
@@ -4499,26 +4492,6 @@ export default function App() {
                 <span>Analista</span>
               </button>
             </div>
-
-            {/* Ações Rápidas Contextuais conforme a Visão */}
-            {(activeRoleView === 'ADMINISTRADOR' || activeRoleView === 'COORDENADOR') && (
-              <button
-                onClick={() => openAutoGenerateModal('11', '2026')}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-400/40 font-bold text-xs shadow-sm transition-all cursor-pointer"
-                title="Gerar automaticamente as tarefas recorrentes para o mês selecionado"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span className="hidden sm:inline">Gerar Lote do Mês</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => openNewTaskModal(activeRoleView === 'ANALISTA' ? 'AVULSA' : 'FECHAMENTO')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{activeRoleView === 'ANALISTA' ? '+ Lançar Tarefa' : '+ Nova Tarefa'}</span>
-            </button>
 
             {/* Sininho de Notificações com Sistema de Lembretes 24h & Menções */}
             <div className="relative">
@@ -4799,6 +4772,32 @@ export default function App() {
               )}
             </div>
 
+            {/* SELETOR DE CARTEIRA EXIBIDA (FILTRO DE TAREFAS POR INTEGRANTE) */}
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5" title="Filtrar tarefas exibidas pela carteira de um integrante ou ver toda a equipe">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600/90 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                <Users className="w-3.5 h-3.5 text-indigo-100" />
+              </div>
+              <div className="text-left">
+                <div className="text-[10px] text-slate-400 leading-none">
+                  Carteira Exibida:
+                </div>
+                <select
+                  value={activeOperatorFilter}
+                  onChange={(e) => setActiveOperatorFilter(e.target.value)}
+                  className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer"
+                >
+                  <option value="TODOS" className="bg-slate-900 text-white">
+                    👥 Toda a Equipe ({TEAM_MEMBERS.length} integrantes)
+                  </option>
+                  {TEAM_MEMBERS.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-slate-900 text-white">
+                      Somente @{m.name} ({USER_CATEGORIES_CONFIG[m.category || 'ANALISTA']?.shortLabel || 'Analista'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* SELETOR DE OPERADOR ATIVO SINCRONIZADO COM A CATEGORIA */}
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5">
               <div className={`w-7 h-7 rounded-lg ${activeOperatorFilter === 'TODOS' ? 'bg-indigo-600' : activeMemberObj.color} text-white font-bold text-xs flex items-center justify-center`}>
@@ -4844,214 +4843,7 @@ export default function App() {
             )}
           </div>
         </div>
-
-        {/* ==========================================
-            CRONÔMETRO ATIVO: QUADRO ÚNICO COMPACTO COM EXPANSÃO AO CLICAR
-        ========================================== */}
-        {kpis.runningTasks.length > 0 && (
-          <div className="bg-blue-950/95 border-t border-blue-800/60 px-4 sm:px-6 py-2">
-            <div className="max-w-[1600px] mx-auto">
-              {!isHeaderTimerExpanded ? (
-                <div
-                  onClick={() => setIsHeaderTimerExpanded(true)}
-                  className="flex items-center justify-between gap-3 cursor-pointer hover:bg-blue-900/50 px-3 py-1.5 rounded-lg transition-colors"
-                  title="Clique para expandir todos os cronômetros ativos da equipe"
-                >
-                  <div className="flex items-center gap-2.5 text-xs font-bold text-blue-200">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span>CRONÔMETROS ATIVOS DA EQUIPE ({kpis.runningTasks.length} rodando)</span>
-                    <span className="text-[11px] text-blue-300 font-normal underline">
-                      Clique para expandir detalhes ▼
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-400">
-                    <span>
-                      {kpis.runningTasks[0]?.code} • {formatDuration(getLiveTaskSeconds(kpis.runningTasks[0]))}
-                    </span>
-                    {kpis.runningTasks.length > 1 && (
-                      <span className="bg-blue-900 px-2 py-0.5 rounded text-[10px] text-blue-200">
-                        +{kpis.runningTasks.length - 1} ativos
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2 py-1">
-                  <div className="flex items-center justify-between text-xs font-bold text-blue-300 pb-1 border-b border-blue-800">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                      CRONÔMETROS ATIVOS EM TEMPO REAL ({kpis.runningTasks.length}):
-                    </span>
-                    <button
-                      onClick={() => setIsHeaderTimerExpanded(false)}
-                      className="text-blue-300 hover:text-white text-xs underline cursor-pointer"
-                    >
-                      Recolher quadro ▲
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {kpis.runningTasks.map((rt) => {
-                      const scopeBadge =
-                        rt.activeTimerScope === 'INDIVIDUAL' && rt.activeTimerBranches?.length > 0
-                          ? rt.activeTimerBranches.length === 1
-                            ? `Filial ${rt.activeTimerBranches[0]}`
-                            : `${rt.activeTimerBranches.length} Filiais`
-                          : 'Todas as 40 Filiais';
-                      return (
-                        <div
-                          key={rt.id}
-                          className="flex items-center gap-2 bg-slate-900/90 border border-blue-500/40 rounded-lg px-2.5 py-1.5 text-xs"
-                        >
-                          <span className="font-bold text-emerald-400 font-mono">
-                            {formatDuration(getLiveTaskSeconds(rt))}
-                          </span>
-                          <span className="text-slate-300 font-medium truncate max-w-[180px]">
-                            [{rt.code}] {rt.title}
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
-                            🏢 {scopeBadge}
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold">
-                            @{rt.activeTimerUser || rt.assignee}
-                          </span>
-                          <button
-                            onClick={() => openPauseModal(rt)}
-                            className="p-1 rounded bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 cursor-pointer"
-                            title="Pausar Cronômetro"
-                          >
-                            <Pause className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleCompleteTask(rt)}
-                            className="p-1 rounded bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 cursor-pointer"
-                            title="Concluir Tarefa"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </header>
-
-      {/* ==========================================
-          BARRA DE ESCOPO DE EMPRESA (TODAS vs INDIVIDUAL) + FILTRO DE OPERADOR
-          Exibida nas visões operacionais de tarefas e dashboard de filiais
-      ========================================== */}
-      {(['LISTA', 'MATRIZ', 'KANBAN', 'AVULSAS', 'DASHBOARD'].includes(activeTab)) && (
-      <div className="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-2">
-        <div className="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              <Building2 className="w-4 h-4" />
-              Escopo 40 Filiais:
-            </span>
-
-            <button
-              onClick={() => setCompanyScopeMode('ALL')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                companyScopeMode === 'ALL'
-                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              <CheckSquare className="w-3.5 h-3.5" />
-              <span>Todas as 40 Empresas</span>
-            </button>
-
-            <div className="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700">
-              <button
-                onClick={() => setCompanyScopeMode('SINGLE')}
-                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  companyScopeMode === 'SINGLE' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                Filial Individual:
-              </button>
-              <select
-                value={selectedSingleCompany}
-                onChange={(e) => {
-                  setSelectedSingleCompany(e.target.value);
-                  setCompanyScopeMode('SINGLE');
-                }}
-                className="bg-transparent text-white text-xs font-mono font-bold px-2 py-1 focus:outline-none cursor-pointer"
-              >
-                {BRANCH_CODES.map((code) => (
-                  <option key={code} value={code} className="bg-slate-900 text-white">
-                    {getBranchDisplayName(code)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              onClick={() => setIsCompanySelectorModalOpen(true)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-                companyScopeMode === 'CUSTOM'
-                  ? 'bg-indigo-600 text-white border-indigo-400'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>
-                {companyScopeMode === 'CUSTOM'
-                  ? `Subconjunto (${selectedCustomCompanies.length} Filiais)`
-                  : 'Múltiplas Filiais...'}
-              </span>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Filtro Rápido de Carteira (Visível especialmente para Coordenador e Admin) */}
-            <div className="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 rounded-lg px-2.5 py-1 text-xs">
-              <Users className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="text-slate-400 text-[11px]">Carteira Exibida:</span>
-              <select
-                value={activeOperatorFilter}
-                onChange={(e) => setActiveOperatorFilter(e.target.value)}
-                className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer"
-              >
-                <option value="TODOS" className="bg-slate-900 text-white">
-                  👥 Toda a Equipe ({TEAM_MEMBERS.length} integrantes)
-                </option>
-                {TEAM_MEMBERS.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-slate-900 text-white">
-                    Somente @{m.name} ({USER_CATEGORIES_CONFIG[m.category || 'ANALISTA']?.shortLabel})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="hidden 2xl:flex items-center gap-1 text-xs">
-              {['010101', '010109', '010180', '020101', '040101'].map((quickCode) => {
-                const isCurr = companyScopeMode === 'SINGLE' && selectedSingleCompany === quickCode;
-                return (
-                  <button
-                    key={quickCode}
-                    onClick={() => {
-                      setSelectedSingleCompany(quickCode);
-                      setCompanyScopeMode('SINGLE');
-                    }}
-                    className={`px-2 py-1 rounded font-mono text-[11px] font-bold transition-all cursor-pointer ${
-                      isCurr
-                        ? 'bg-blue-500 text-white ring-2 ring-blue-300'
-                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    {quickCode}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-      )}
 
       {/* ==========================================
           LAYOUT PRINCIPAL: MENU LATERAL (SIDEBAR) & WORKSPACE
@@ -5085,6 +4877,56 @@ export default function App() {
             >
               {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </button>
+          </div>
+
+          {/* AÇÕES RÁPIDAS NO MENU LATERAL: + NOVA TAREFA & GERAR LOTE DO MÊS */}
+          <div className="p-2 border-b border-slate-800 bg-slate-950/40 space-y-1.5">
+            {!isSidebarCollapsed ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => openNewTaskModal(activeRoleView === 'ANALISTA' ? 'AVULSA' : 'FECHAMENTO')}
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold text-xs shadow-md shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                  title="Criar uma nova tarefa contábil ou operacional"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                  <span>{activeRoleView === 'ANALISTA' ? '+ Lançar Tarefa' : '+ Nova Tarefa'}</span>
+                </button>
+
+                {(activeRoleView === 'ADMINISTRADOR' || activeRoleView === 'COORDENADOR') && (
+                  <button
+                    type="button"
+                    onClick={() => openAutoGenerateModal('11', '2026')}
+                    className="w-full py-2 px-3 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white border border-indigo-500/40 font-bold text-xs shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                    title="Gerar automaticamente as tarefas recorrentes para o mês selecionado"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Gerar Lote do Mês</span>
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-1.5 py-0.5">
+                <button
+                  type="button"
+                  onClick={() => openNewTaskModal(activeRoleView === 'ANALISTA' ? 'AVULSA' : 'FECHAMENTO')}
+                  className="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-md cursor-pointer transition-transform hover:scale-105"
+                  title={activeRoleView === 'ANALISTA' ? '+ Lançar Tarefa' : '+ Nova Tarefa'}
+                >
+                  <Plus className="w-5 h-5 stroke-[3]" />
+                </button>
+                {(activeRoleView === 'ADMINISTRADOR' || activeRoleView === 'COORDENADOR') && (
+                  <button
+                    type="button"
+                    onClick={() => openAutoGenerateModal('11', '2026')}
+                    className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-md cursor-pointer transition-transform hover:scale-105 border border-indigo-400/40"
+                    title="Gerar Lote do Mês"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Lista de Seções Segregadas */}
@@ -5185,9 +5027,9 @@ export default function App() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-[9px] uppercase font-bold text-slate-400">Tempo Hoje</div>
+                  <div className="text-[9px] uppercase font-bold text-slate-400">Entregas</div>
                   <div className="font-mono text-[11px] font-bold text-emerald-400">
-                    {formatDuration(myPersonalMetrics.secondsSpent)}
+                    {myPersonalMetrics.concluidas}/{myPersonalMetrics.totalAssigned} ({myPersonalMetrics.percent}%)
                   </div>
                 </div>
               </div>
@@ -5223,6 +5065,34 @@ export default function App() {
                 >
                   <X className="w-5 h-5" />
                 </button>
+              </div>
+
+              {/* Ações Rápidas Mobile */}
+              <div className="p-3 border-b border-slate-800 space-y-2 bg-slate-950/40">
+                <button
+                  type="button"
+                  onClick={() => {
+                    openNewTaskModal(activeRoleView === 'ANALISTA' ? 'AVULSA' : 'FECHAMENTO');
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                  <span>{activeRoleView === 'ANALISTA' ? '+ Lançar Tarefa' : '+ Nova Tarefa'}</span>
+                </button>
+                {(activeRoleView === 'ADMINISTRADOR' || activeRoleView === 'COORDENADOR') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openAutoGenerateModal('11', '2026');
+                      setIsMobileSidebarOpen(false);
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-400/40 font-bold text-xs shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Gerar Lote do Mês</span>
+                  </button>
+                )}
               </div>
 
               <div className="flex-1 overflow-y-auto p-3 space-y-4">
@@ -5388,17 +5258,21 @@ export default function App() {
                 <span className="text-[10px] opacity-75">{isRoleOverviewExpanded ? '▲' : '▼'}</span>
               </button>
 
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">
-                <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                <span className="text-slate-600 hidden sm:inline">
-                  {activeRoleView === 'ANALISTA' ? `@${currentUser}:` : 'Equipe:'}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('LISTA');
+                  setStatusFilter('EM_ANDAMENTO');
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
+                title="Filtrar tarefas em andamento"
+              >
+                <Play className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                <span className="text-blue-800 hidden sm:inline">Em Andamento:</span>
+                <span className="font-bold text-blue-900 tabular-nums">
+                  {kpis.emAndamento}
                 </span>
-                <span className="font-mono font-bold text-slate-900 tabular-nums">
-                  {formatDuration(
-                    activeRoleView === 'ANALISTA' ? myPersonalMetrics.secondsSpent : kpis.totalTeamSeconds
-                  )}
-                </span>
-              </div>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -5770,8 +5644,8 @@ export default function App() {
                             <div className="text-[10px] text-slate-500">{catCfg.shortLabel} • {um.department || 'Contábil'}</div>
                           </div>
                         </div>
-                        <span className="font-mono text-xs font-extrabold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                          {formatDuration(um.secondsSpent)}
+                        <span className="font-mono text-xs font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          {pct}% Concluído
                         </span>
                       </div>
 
@@ -5910,12 +5784,12 @@ export default function App() {
               </div>
 
               <div className="p-3 rounded-xl bg-white border border-emerald-200">
-                <div className="text-[11px] font-bold text-emerald-800 uppercase">Meu Tempo & Entrega</div>
+                <div className="text-[11px] font-bold text-emerald-800 uppercase">Minhas Entregas</div>
                 <div className="text-xl font-mono font-extrabold text-emerald-700 mt-1">
-                  {formatDuration(myPersonalMetrics.secondsSpent)}
+                  {myPersonalMetrics.percent}%
                 </div>
                 <div className="text-[11px] text-emerald-700 font-bold">
-                  {myPersonalMetrics.concluidas}/{myPersonalMetrics.totalAssigned} concluídas
+                  {myPersonalMetrics.concluidas}/{myPersonalMetrics.totalAssigned} tarefas concluídas
                 </div>
               </div>
             </div>
@@ -7408,7 +7282,7 @@ export default function App() {
                   { id: 'TODAS', label: 'Todas' },
                   { id: 'MINHAS', label: `Minhas (@${currentUser})` },
                   { id: 'DEPENDENCIA_COMIGO', label: `Comigo (@)`, count: kpis.dependenciaComigo, purple: true },
-                  { id: 'EM_EXECUCAO', label: 'Timer ON' },
+                  { id: 'EM_EXECUCAO', label: 'Em Andamento', count: kpis.emAndamento },
                   { id: 'FECHAMENTO', label: 'Fechamento' },
                   { id: 'AVULSAS', label: 'Avulsas' }
                 ].map((pill) => {
@@ -7520,6 +7394,7 @@ export default function App() {
                   subGroupFilter !== 'TODOS' ||
                   recurrenceFilter !== 'TODOS' ||
                   competenceFilter !== 'TODOS' ||
+                  companyScopeMode !== 'ALL' ||
                   activeOperatorFilter !== 'TODOS' ||
                   searchQuery.trim() !== '') && (
                   <button
@@ -7532,6 +7407,7 @@ export default function App() {
                       setSubGroupFilter('TODOS');
                       setRecurrenceFilter('TODOS');
                       setCompetenceFilter('TODOS');
+                      setCompanyScopeMode('ALL');
                       setActiveOperatorFilter('TODOS');
                       setSearchQuery('');
                     }}
@@ -7546,6 +7422,100 @@ export default function App() {
                 <span className="text-xs font-semibold text-slate-500 tabular-nums">
                   <strong>{filteredTasks.length}</strong>/{tasks.length}
                 </span>
+              </div>
+            </div>
+
+            {/* Linha de Escopo 40 Filiais Integrada como Filtro da Tela de Acompanhamento */}
+            <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-black text-slate-700 flex items-center gap-1.5 uppercase tracking-wider mr-1">
+                  <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Escopo 40 Filiais:
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setCompanyScopeMode('ALL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    companyScopeMode === 'ALL'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  <span>Todas as 40 Empresas</span>
+                </button>
+
+                <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setCompanyScopeMode('SINGLE')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      companyScopeMode === 'SINGLE'
+                        ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Filial Individual:
+                  </button>
+                  <select
+                    value={selectedSingleCompany}
+                    onChange={(e) => {
+                      setSelectedSingleCompany(e.target.value);
+                      setCompanyScopeMode('SINGLE');
+                    }}
+                    className="bg-transparent text-slate-800 text-xs font-mono font-bold px-2 py-1 focus:outline-none cursor-pointer max-w-[240px] truncate"
+                  >
+                    {BRANCH_CODES.map((code) => (
+                      <option key={code} value={code} className="bg-white text-slate-900">
+                        {getBranchDisplayName(code)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsCompanySelectorModalOpen(true)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                    companyScopeMode === 'CUSTOM'
+                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                      : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                  }`}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>
+                    {companyScopeMode === 'CUSTOM'
+                      ? `Subconjunto (${selectedCustomCompanies.length} Filiais)`
+                      : 'Múltiplas Filiais...'}
+                  </span>
+                </button>
+              </div>
+
+              {/* Atalhos Rápidos para Filiais Estratégicas */}
+              <div className="hidden lg:flex items-center gap-1 text-xs">
+                <span className="text-[10px] text-slate-400 font-bold uppercase mr-1">Atalhos:</span>
+                {['010101', '010109', '010180', '020101', '040101'].map((quickCode) => {
+                  const isCurr = companyScopeMode === 'SINGLE' && selectedSingleCompany === quickCode;
+                  return (
+                    <button
+                      key={quickCode}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSingleCompany(quickCode);
+                        setCompanyScopeMode('SINGLE');
+                      }}
+                      className={`px-2 py-1 rounded font-mono text-[11px] font-bold transition-all cursor-pointer ${
+                        isCurr
+                          ? 'bg-blue-600 text-white shadow-2xs ring-1 ring-blue-400'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                      title={getBranchDisplayName(quickCode)}
+                    >
+                      {quickCode}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -7773,8 +7743,7 @@ export default function App() {
                         <th className="p-2.5 border-r border-slate-800 text-center w-[110px]">Vencimento</th>
                         <th className="p-2.5 border-r border-slate-800 w-[135px]">Responsável</th>
                         <th className="p-2.5 border-r border-slate-800 text-center w-[140px]">Status</th>
-                        <th className="p-2.5 border-r border-slate-800 text-center w-[150px]">40 Filiais (Acordeão)</th>
-                        <th className="p-2.5 border-r border-slate-800 text-center w-[110px]">Cronômetro</th>
+                        <th className="p-2.5 border-r border-slate-800 text-center w-[160px]">40 Filiais (Acordeão)</th>
                         <th className="p-2.5 text-center min-w-[215px] bg-slate-800">Ações Rápidas</th>
                       </tr>
                     </thead>
@@ -7907,13 +7876,7 @@ export default function App() {
                                       style={{ width: `${allBranchStats.percent}%` }}
                                     />
                                   </div>
-                                </button>
-                              </td>
-
-                              <td className="p-2.5 border-r border-slate-200 text-center font-mono font-extrabold tabular-nums">
-                                <span className={isRunning ? 'text-blue-700 animate-pulse' : 'text-slate-900'}>
-                                  {formatDuration(liveSeconds)}
-                                </span>
+                                 </button>
                               </td>
 
                               <td className="p-2 text-center bg-slate-50/50">
@@ -7921,17 +7884,17 @@ export default function App() {
                                   {!isRunning ? (
                                     <button
                                       onClick={() => handleStartTask(task)}
-                                      className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
-                                      title="Iniciar Cronômetro"
+                                      className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer shadow-2xs"
+                                      title={task.status === 'PAUSADA' ? 'Retomar Tarefa (Status: Em Andamento)' : 'Iniciar Tarefa (Status: Em Andamento)'}
                                     >
                                       <Play className="w-3 h-3 fill-white" />
-                                      <span>Iniciar</span>
+                                      <span>{task.status === 'PAUSADA' ? 'Retomar' : 'Iniciar'}</span>
                                     </button>
                                   ) : (
                                     <button
                                       onClick={() => openPauseModal(task)}
-                                      className="px-2 py-1 rounded bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
-                                      title="Pausar Cronômetro"
+                                      className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer shadow-2xs"
+                                      title="Pausar Tarefa (Status: Pausada)"
                                     >
                                       <Pause className="w-3 h-3 fill-white" />
                                       <span>Pausar</span>
@@ -7973,7 +7936,7 @@ export default function App() {
 
                             {isGridExpanded && (
                               <tr className="bg-slate-50 border-b border-slate-200">
-                                <td colSpan={9} className="p-3.5 space-y-2.5">
+                                <td colSpan={8} className="p-3.5 space-y-2.5">
                                   <div className="flex flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-1.5">
                                       <span className="text-xs font-bold text-slate-700">
@@ -8265,19 +8228,12 @@ export default function App() {
                               </div>
                             </button>
 
-                            {/* Cronômetro */}
-                            <div className={`px-3 py-2 rounded-xl border min-w-[125px] text-center ${
-                              isRunning
-                                ? 'bg-blue-950 text-white border-blue-700 shadow-sm'
-                                : 'bg-slate-50 text-slate-800 border-slate-200'
-                            }`}>
-                              <div className="text-[10px] uppercase tracking-wider font-semibold opacity-75 flex items-center justify-center gap-1">
-                                <Timer className="w-3 h-3" />
-                                <span>{isRunning ? 'Timer ON' : 'Tempo Gasto'}</span>
-                              </div>
-                              <div className={`font-mono text-sm sm:text-base font-extrabold tabular-nums ${isRunning ? 'text-emerald-400' : 'text-slate-900'}`}>
-                                {formatDuration(liveSeconds)}
-                              </div>
+                            {/* Status da Tarefa */}
+                            <div className="text-center min-w-[120px]">
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border shadow-2xs ${st.bg} ${st.text} ${st.border}`}>
+                                <span className={`w-2 h-2 rounded-full ${st.dot} ${isRunning ? 'animate-ping' : ''}`} />
+                                <span>{st.label}</span>
+                              </span>
                             </div>
 
                             {/* Botões de Ação */}
@@ -8286,10 +8242,10 @@ export default function App() {
                                 <button
                                   onClick={() => handleStartTask(task)}
                                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs cursor-pointer"
-                                  title="Iniciar Cronômetro"
+                                  title={task.status === 'PAUSADA' ? 'Retomar Tarefa (Status: Em Andamento)' : 'Iniciar Tarefa (Status: Em Andamento)'}
                                 >
                                   <Play className="w-3.5 h-3.5 fill-white" />
-                                  <span>Iniciar</span>
+                                  <span>{task.status === 'PAUSADA' ? 'Retomar' : 'Iniciar'}</span>
                                 </button>
                               )}
 
@@ -8499,7 +8455,7 @@ export default function App() {
                     <th className="p-2.5 border-r border-slate-700 sticky left-0 bg-slate-900 z-30 min-w-[75px]">ID</th>
                     <th className="p-2.5 border-r border-slate-700 sticky left-[75px] bg-slate-900 z-30 min-w-[260px] max-w-[260px]">Obrigação / Tarefa Contábil</th>
                     <th className="p-2.5 border-r border-slate-700 min-w-[95px]">Resp.</th>
-                    <th className="p-2.5 border-r border-slate-700 min-w-[90px] text-center">Tempo</th>
+                    <th className="p-2.5 border-r border-slate-700 min-w-[105px] text-center">Status</th>
                     <th className="p-2.5 border-r border-slate-700 min-w-[80px] text-center">% Filiais</th>
                     <th className="p-2.5 border-r border-slate-700 min-w-[145px] text-center bg-slate-800">Ação Lote</th>
                     {activeScopedBranches.map((code) => {
@@ -8542,7 +8498,11 @@ export default function App() {
                           {task.title}
                         </td>
                         <td className="p-2 border-r border-slate-200 font-bold text-slate-700">@{task.assignee}</td>
-                        <td className="p-2 border-r border-slate-200 font-mono font-bold text-center">{formatDuration(liveSecs)}</td>
+                        <td className="p-2 border-r border-slate-200 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${STATUS_CONFIG[task.status]?.bg || 'bg-slate-100'} ${STATUS_CONFIG[task.status]?.text || 'text-slate-800'} ${STATUS_CONFIG[task.status]?.border || 'border-slate-200'}`}>
+                            {STATUS_CONFIG[task.status]?.label || task.status}
+                          </span>
+                        </td>
                         <td className="p-2 border-r border-slate-200 text-center font-bold">
                           <span className={`px-1.5 py-0.5 rounded text-[11px] ${stStats.percent === 100 ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-100 text-slate-800'}`}>
                             {stStats.percent}%
@@ -8645,8 +8605,8 @@ export default function App() {
                                 </span>
                                 {task.isCritical && <AlertTriangle className="w-3 h-3 text-rose-600" />}
                               </div>
-                              <span className="font-mono text-xs font-bold text-slate-700 flex items-center gap-1 tabular-nums">
-                                <Clock className="w-3 h-3 text-blue-600" /> {formatDuration(liveSecs)}
+                              <span className="font-mono text-[10px] text-slate-500 font-bold">
+                                {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
                               </span>
                             </div>
 
@@ -8985,16 +8945,16 @@ export default function App() {
                 className="p-4 rounded-xl border border-slate-200 bg-white cursor-pointer"
               >
                 <div className="flex items-center justify-between text-[11px] font-extrabold uppercase text-slate-600">
-                  <span>TEMPO INVESTIDO</span>
-                  <Timer className="w-4 h-4 text-indigo-600" />
+                  <span>TOTAL MONITORADO</span>
+                  <CheckSquare className="w-4 h-4 text-indigo-600" />
                 </div>
                 <div className="mt-2 flex items-baseline justify-between">
-                  <span className="text-xl font-mono font-extrabold text-slate-900">
-                    {formatDuration(slaAnalysisData.totalSeconds)}
+                  <span className="text-xl font-extrabold text-slate-900">
+                    {slaAnalysisData.total} tarefas
                   </span>
                 </div>
                 <div className="mt-1 text-[11px] text-slate-500">
-                  Média: <strong className="font-mono">{formatDuration(slaAnalysisData.avgSecondsPerTask)}</strong> / tarefa
+                  Entregas concluídas: <strong className="font-bold text-emerald-700">{slaAnalysisData.entregues}</strong> ({slaAnalysisData.total > 0 ? Math.round((slaAnalysisData.entregues / slaAnalysisData.total) * 100) : 0}%)
                 </div>
               </div>
             </div>
@@ -9311,7 +9271,7 @@ export default function App() {
                         <th className="p-2.5 text-center">Em Atraso</th>
                         <th className="p-2.5 text-center">Vence Hoje/3d</th>
                         <th className="p-2.5 text-center">Dep. (@)</th>
-                        <th className="p-2.5 text-center">Tempo Apontado</th>
+                        <th className="p-2.5 text-center">Em Andamento</th>
                         <th className="p-2.5 rounded-tr-lg text-center">Status Carteira</th>
                       </tr>
                     </thead>
@@ -9383,8 +9343,8 @@ export default function App() {
                               {an.aguardandoDep}
                             </td>
 
-                            <td className="p-2.5 text-center font-mono font-extrabold text-slate-900">
-                              {formatDuration(an.secondsSpent)}
+                            <td className="p-2.5 text-center font-mono font-extrabold text-blue-700">
+                              {an.emAndamento}
                             </td>
 
                             <td className="p-2.5 text-center">
@@ -9431,8 +9391,8 @@ export default function App() {
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <div className="font-mono text-xs font-extrabold text-slate-800">
-                            {formatDuration(grp.seconds)}
+                          <div className="font-mono text-xs font-extrabold text-emerald-700">
+                            {grp.pct}%
                           </div>
                           <div className="w-20 h-1.5 bg-slate-200 rounded-full overflow-hidden mt-1">
                             <div className="h-full bg-emerald-600" style={{ width: `${grp.pct}%` }} />
@@ -9493,14 +9453,13 @@ export default function App() {
                       <th className="p-3 border-r border-slate-800">Responsável</th>
                       <th className="p-3 border-r border-slate-800 text-center">Status Execução</th>
                       <th className="p-3 border-r border-slate-800 text-center">Entrega 40 Filiais</th>
-                      <th className="p-3 border-r border-slate-800 text-center">Tempo Gasto</th>
                       <th className="p-3 text-center">Ações Diretas</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {slaAnalysisData.tableTasks.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="p-8 text-center text-slate-500 font-medium">
+                        <td colSpan={8} className="p-8 text-center text-slate-500 font-medium">
                           Nenhuma tarefa encontrada para o filtro de SLA selecionado.
                         </td>
                       </tr>
@@ -9604,10 +9563,6 @@ export default function App() {
                               </div>
                             </td>
 
-                            <td className="p-2.5 border-r border-slate-200 text-center font-mono font-bold text-slate-900">
-                              {formatDuration(t.liveSeconds)}
-                            </td>
-
                             <td className="p-2.5 text-center">
                               <div className="flex items-center justify-center gap-1">
                                 <button
@@ -9657,11 +9612,11 @@ export default function App() {
                 <div>
                   <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                     <Users className="w-5 h-5 text-indigo-600" />
-                    Matriz de Tempo Investido, Carga e Entregas por Analista Contábil
+                    Matriz de Carga, Status e Entregas por Analista Contábil
                   </h2>
                 </div>
                 <div className="text-xs font-mono font-bold bg-slate-900 text-white px-3 py-1.5 rounded-lg">
-                  Tempo Total Departamento: {formatDuration(kpis.totalTeamSeconds)}
+                  Entregas Gerais: {kpis.concluidas}/{tasks.length} ({kpis.percentConcluido}%)
                 </div>
               </div>
 
@@ -9685,10 +9640,10 @@ export default function App() {
                         </span>
                       </div>
                       <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between">
-                        <span className="text-xs text-slate-600 flex items-center gap-1.5">
-                          <Timer className="w-4 h-4 text-blue-600" /> Tempo Cronometrado:
+                        <span className="text-xs text-slate-600 flex items-center gap-1.5 font-bold">
+                          <Play className="w-3.5 h-3.5 text-blue-600 fill-blue-600" /> Em Andamento:
                         </span>
-                        <span className="font-mono text-sm font-extrabold text-slate-900">{formatDuration(um.secondsSpent)}</span>
+                        <span className="font-mono text-sm font-extrabold text-blue-700">{um.emAndamento} ativa(s)</span>
                       </div>
                       <div className="grid grid-cols-3 gap-1.5 text-center text-[11px]">
                         <div className="bg-white p-1.5 rounded border border-slate-200">
@@ -12369,10 +12324,12 @@ function TaskDetailDrawer({
 
         <div className="bg-slate-100 border-b border-slate-200 px-5 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="px-3 py-1.5 rounded-lg bg-slate-900 text-white flex items-center gap-2">
-              <Timer className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs text-slate-300">Tempo Gasto:</span>
-              <span className="font-mono text-sm font-extrabold text-emerald-400">{formatDuration(liveSeconds)}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status:</span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold border shadow-2xs ${STATUS_CONFIG[task.status]?.bg || 'bg-slate-100'} ${STATUS_CONFIG[task.status]?.text || 'text-slate-800'} ${STATUS_CONFIG[task.status]?.border || 'border-slate-200'}`}>
+                <span className={`w-2 h-2 rounded-full ${STATUS_CONFIG[task.status]?.dot || 'bg-slate-500'} ${task.status === 'EM_ANDAMENTO' ? 'animate-ping' : ''}`} />
+                <span>{STATUS_CONFIG[task.status]?.label || task.status}</span>
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">

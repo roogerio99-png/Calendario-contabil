@@ -1,6 +1,6 @@
 {
-  "name": "Agriconnection • Gestão & Time Tracking Contábil",
-  "description": "Sistema de Gestão e Time Tracking Contábil para controle de fechamento mensal, conciliações, pausas, dependências (@) e tarefas avulsas nas 40 filiais.",
+  "name": "Task Account — Gestão de Tarefas de Controladoria",
+  "description": "Sistema Task Account de Gestão de Tarefas de Controladoria para controle de fechamento mensal, conciliações, pausas, dependências (@) e tarefas avulsas nas 40 filiais.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
