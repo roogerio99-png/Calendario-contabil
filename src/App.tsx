@@ -4379,85 +4379,150 @@ export default function App() {
       : 'border-emerald-500/40 from-slate-950 via-slate-900 to-emerald-950/70';
 
   return (
-    <div className="min-h-screen bg-slate-100/80 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-100/80 text-slate-900 flex flex-col font-sans w-full max-w-full overflow-x-hidden">
       {/* ==========================================
           HEADER CORPORATIVO COM SEGREGAÇÃO DE VISÃO (ADMIN / COORDENADOR / ANALISTA)
       ========================================== */}
-      <header className={`bg-gradient-to-r ${roleHeaderAccent} text-white border-b sticky top-0 z-30 shadow-md`}>
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
-          {/* Toggle do Menu Lateral + Identidade & Status */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                  setIsMobileSidebarOpen((prev) => !prev);
-                } else {
-                  setIsSidebarCollapsed((prev) => !prev);
-                }
-              }}
-              className="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 cursor-pointer transition-all flex items-center justify-center shrink-0 shadow-xs hover:border-slate-500"
-              title="Recolher / Expandir Menu Lateral"
-            >
-              <Menu className="w-5 h-5 text-white" />
-            </button>
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
-                activeRoleView === 'ADMINISTRADOR'
-                  ? 'bg-gradient-to-br from-rose-500 to-indigo-600 shadow-rose-950/50'
-                  : activeRoleView === 'COORDENADOR'
-                  ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-950/50'
-                  : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-950/50'
-              }`}
-            >
-              <Briefcase className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold tracking-tight text-white">
-                  Task Account — Gestão de Tarefas de Controladoria
-                </h1>
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-extrabold border ${
-                    activeRoleView === 'ADMINISTRADOR'
-                      ? 'bg-rose-500/20 text-rose-200 border-rose-400/40'
-                      : activeRoleView === 'COORDENADOR'
-                      ? 'bg-amber-500/20 text-amber-200 border-amber-400/40'
-                      : 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40'
-                  }`}
-                >
-                  {activeRoleView === 'ADMINISTRADOR'
-                    ? '🛡️ AMBIENTE ADMINISTRADOR'
+      <header className={`bg-gradient-to-r ${roleHeaderAccent} text-white border-b sticky top-0 z-30 shadow-md relative w-full`}>
+        <div className="max-w-[1600px] mx-auto px-2.5 sm:px-6 py-1.5 sm:py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-3">
+          {/* TIER 1 NO MOBILE (OU BLOCO ESQUERDO NO DESKTOP): Hamburger + Logo + Título + Controles Rápidos Mobile (Sininho + Operador) */}
+          <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+            {/* Toggle do Menu Lateral + Identidade */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                    setIsMobileSidebarOpen((prev) => !prev);
+                  } else {
+                    setIsSidebarCollapsed((prev) => !prev);
+                  }
+                }}
+                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 cursor-pointer transition-all flex items-center justify-center shrink-0 shadow-xs hover:border-slate-500"
+                title="Recolher / Expandir Menu Lateral"
+              >
+                <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </button>
+              <div
+                className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md shrink-0 ${
+                  activeRoleView === 'ADMINISTRADOR'
+                    ? 'bg-gradient-to-br from-rose-500 to-indigo-600 shadow-rose-950/50'
                     : activeRoleView === 'COORDENADOR'
-                    ? '🧭 AMBIENTE COORDENADOR'
-                    : '⚙️ AMBIENTE ANALISTA'}
-                </span>
-                <span className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-                  Competência {competenceFilter === 'TODAS' || competenceFilter === 'TODOS' ? 'Geral' : competenceFilter}
-                </span>
-                {cloudSynced ? (
-                  <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                    <ShieldCheck className="w-3 h-3" /> Firestore Ativo
-                  </span>
-                ) : (
-                  <button
-                    onClick={handleGoogleSignIn}
-                    className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 cursor-pointer transition-colors"
-                    title="Conectar conta Google para sincronizar no Firebase Firestore"
-                  >
-                    <LogIn className="w-3 h-3 text-emerald-400" /> Sincronizar Nuvem
-                  </button>
-                )}
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-950/50'
+                    : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-950/50'
+                }`}
+              >
+                <Briefcase className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white" />
               </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <h1 className="text-xs sm:text-base font-extrabold tracking-tight text-white truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
+                    <span className="sm:hidden">Task Account</span>
+                    <span className="hidden sm:inline">Task Account — Gestão de Controladoria</span>
+                  </h1>
+                  <span
+                    className={`hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold border ${
+                      activeRoleView === 'ADMINISTRADOR'
+                        ? 'bg-rose-500/20 text-rose-200 border-rose-400/40'
+                        : activeRoleView === 'COORDENADOR'
+                        ? 'bg-amber-500/20 text-amber-200 border-amber-400/40'
+                        : 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40'
+                    }`}
+                  >
+                    {activeRoleView === 'ADMINISTRADOR'
+                      ? '🛡️ ADMIN'
+                      : activeRoleView === 'COORDENADOR'
+                      ? '🧭 COORD'
+                      : '⚙️ ANALISTA'}
+                  </span>
+                  <span className="hidden 2xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                    Comp. {competenceFilter === 'TODAS' || competenceFilter === 'TODOS' ? 'Geral' : competenceFilter}
+                  </span>
+                  {cloudSynced ? (
+                    <span className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                      <ShieldCheck className="w-3 h-3" /> Firestore Ativo
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleGoogleSignIn}
+                      className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 cursor-pointer transition-colors"
+                      title="Conectar conta Google para sincronizar no Firebase Firestore"
+                    >
+                      <LogIn className="w-3 h-3 text-emerald-400" /> Sincronizar Nuvem
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* CONTROLES MOBILE DO TIER 1: Sininho + Operador + Logout */}
+            <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setShowNotifications((prev) => !prev)}
+                className={`relative p-1.5 rounded-lg transition-all cursor-pointer border ${
+                  reminders24hData.totalCount > 0
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-400/50 ring-1 ring-amber-400/40'
+                    : 'bg-slate-800 text-slate-200 border-slate-700'
+                }`}
+                title={`Notificações: ${reminders24hData.totalCount} lembretes (< 24h)`}
+              >
+                {reminders24hData.totalCount > 0 ? (
+                  <BellRing className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                ) : (
+                  <Bell className="w-3.5 h-3.5" />
+                )}
+                {reminders24hData.totalCount + myNotifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-3.5 h-3.5 px-0.5 rounded-full text-[9px] font-black flex items-center justify-center text-white bg-rose-500">
+                    {reminders24hData.totalCount + myNotifications.length}
+                  </span>
+                )}
+              </button>
+
+              <div className="flex items-center gap-1 bg-slate-900 border border-slate-700/80 rounded-lg px-1.5 py-1 text-xs">
+                <div className={`w-4 h-4 rounded-md ${activeMemberObj.color} text-white font-bold text-[9px] flex items-center justify-center shrink-0`}>
+                  {activeMemberObj.avatar}
+                </div>
+                <select
+                  value={currentUser}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCurrentUser(val);
+                    const member = TEAM_MEMBERS.find((m) => m.id === val);
+                    if (member) {
+                      const cat = (member.category || 'ANALISTA') as 'ADMINISTRADOR' | 'COORDENADOR' | 'ANALISTA';
+                      handleSelectRoleView(cat, val);
+                    }
+                  }}
+                  className="bg-transparent text-white text-[11px] font-bold focus:outline-none cursor-pointer max-w-[65px] truncate"
+                >
+                  {TEAM_MEMBERS.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-slate-900 text-white">
+                      @{m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {fbUser && (
+                <button
+                  onClick={handleGoogleSignOut}
+                  className="p-1 rounded-lg bg-slate-800 text-slate-300 cursor-pointer"
+                  title="Sair da conta Google"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
 
-          {/* SELETOR DE VISÃO POR PERFIL (ADMINISTRADOR | COORDENADOR | ANALISTA) */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center bg-slate-950/90 p-1 rounded-xl border border-slate-700/80 shadow-inner">
+          {/* TIER 2 NO MOBILE (OU CONTINUAÇÃO DO HEADER NO DESKTOP):
+              Seletor de Perfil [Admin|Coord|Analista] + Carteira Exibida (+ Sininho & Operador no Desktop) */}
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 text-xs w-full sm:w-auto">
+            {/* Seletor Segmentado de Perfil */}
+            <div className="flex items-center bg-slate-950/90 p-0.5 sm:p-1 rounded-xl border border-slate-700/80 shadow-inner flex-1 sm:flex-initial justify-between sm:justify-start">
               <button
                 onClick={() => handleSelectRoleView('ADMINISTRADOR')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-2 sm:px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   activeRoleView === 'ADMINISTRADOR'
                     ? 'bg-rose-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
@@ -4465,11 +4530,12 @@ export default function App() {
                 title="Visão de Governança, Usuários, Catálogo Padrão e Parametrização"
               >
                 <span>🛡️</span>
-                <span>Administrador</span>
+                <span className="hidden sm:inline">Administrador</span>
+                <span className="sm:hidden text-[10px]">Admin</span>
               </button>
               <button
                 onClick={() => handleSelectRoleView('COORDENADOR')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-2 sm:px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   activeRoleView === 'COORDENADOR'
                     ? 'bg-amber-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
@@ -4477,11 +4543,12 @@ export default function App() {
                 title="Visão de Supervisão da Equipe, Geração de Lote Mensal e Gargalos"
               >
                 <span>🧭</span>
-                <span>Coordenador</span>
+                <span className="hidden sm:inline">Coordenador</span>
+                <span className="sm:hidden text-[10px]">Coord</span>
               </button>
               <button
                 onClick={() => handleSelectRoleView('ANALISTA')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-2 sm:px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                   activeRoleView === 'ANALISTA'
                     ? 'bg-emerald-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
@@ -4489,15 +4556,40 @@ export default function App() {
                 title="Visão Focada de Execução Pessoal, Checklist e Cronômetro do Analista"
               >
                 <span>⚙️</span>
-                <span>Analista</span>
+                <span className="hidden sm:inline">Analista</span>
+                <span className="sm:hidden text-[10px]">Analista</span>
               </button>
             </div>
 
-            {/* Sininho de Notificações com Sistema de Lembretes 24h & Menções */}
-            <div className="relative">
+            {/* SELETOR DE CARTEIRA EXIBIDA (FILTRO DE TAREFAS POR INTEGRANTE) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-900 border border-slate-700/80 rounded-lg sm:rounded-xl px-2 py-1 text-xs shrink-0" title="Filtrar tarefas exibidas pela carteira de um integrante ou ver toda a equipe">
+              <Users className="w-3.5 h-3.5 text-indigo-300 shrink-0" />
+              <div className="text-left">
+                <div className="hidden xl:block text-[9px] text-slate-400 leading-none">
+                  Carteira:
+                </div>
+                <select
+                  value={activeOperatorFilter}
+                  onChange={(e) => setActiveOperatorFilter(e.target.value)}
+                  className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer max-w-[85px] sm:max-w-[130px] truncate"
+                >
+                  <option value="TODOS" className="bg-slate-900 text-white">
+                    Equipe ({TEAM_MEMBERS.length})
+                  </option>
+                  {TEAM_MEMBERS.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-slate-900 text-white">
+                      @{m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* DESKTOP ONLY: Sininho + Operador Completo + Logout */}
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setShowNotifications((prev) => !prev)}
-                className={`relative p-2 rounded-lg transition-all cursor-pointer border ${
+                className={`relative p-1.5 sm:p-2 rounded-lg transition-all cursor-pointer border ${
                   reminders24hData.totalCount > 0
                     ? 'bg-amber-500/20 text-amber-300 border-amber-400/50 hover:bg-amber-500/30 ring-1 ring-amber-400/40'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
@@ -4505,9 +4597,9 @@ export default function App() {
                 title={`Notificações: ${reminders24hData.totalCount} lembretes (< 24h) e ${myNotifications.length} menções`}
               >
                 {reminders24hData.totalCount > 0 ? (
-                  <BellRing className="w-4 h-4 text-amber-300 animate-pulse" />
+                  <BellRing className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 animate-pulse" />
                 ) : (
-                  <Bell className="w-4 h-4" />
+                  <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 )}
                 {reminders24hData.totalCount + myNotifications.length > 0 && (
                   <span
@@ -4522,327 +4614,299 @@ export default function App() {
                 )}
               </button>
 
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-[460px] bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                  {/* Cabeçalho do Dropdown com Tabs */}
-                  <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
-                    <div className="flex items-center gap-1.5 p-0.5 bg-slate-950 rounded-xl border border-slate-800">
-                      <button
-                        onClick={() => setNotificationTab('LEMBRETES')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-                          notificationTab === 'LEMBRETES'
-                            ? 'bg-amber-500 text-slate-950 shadow-xs'
-                            : 'text-slate-300 hover:text-white'
-                        }`}
-                      >
-                        <AlarmClock className="w-3.5 h-3.5" />
-                        <span>Lembretes 24h</span>
-                        <span
-                          className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                            notificationTab === 'LEMBRETES' ? 'bg-slate-900 text-amber-300' : 'bg-slate-800 text-slate-300'
-                          }`}
-                        >
-                          {reminders24hData.totalCount}
-                        </span>
-                      </button>
-
-                      <button
-                        onClick={() => setNotificationTab('MENCOES')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-                          notificationTab === 'MENCOES'
-                            ? 'bg-purple-600 text-white shadow-xs'
-                            : 'text-slate-300 hover:text-white'
-                        }`}
-                      >
-                        <AtSign className="w-3.5 h-3.5" />
-                        <span>Menções (@)</span>
-                        <span
-                          className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                            notificationTab === 'MENCOES' ? 'bg-purple-900 text-purple-200' : 'bg-slate-800 text-slate-300'
-                          }`}
-                        >
-                          {myNotifications.length}
-                        </span>
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => setShowNotifications(false)}
-                      className="text-slate-400 hover:text-white cursor-pointer p-1 rounded-lg hover:bg-slate-800"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* CONTEÚDO DA TAB: LEMBRETES 24H */}
-                  {notificationTab === 'LEMBRETES' && (
-                    <div>
-                      {/* Sub-filtro: Minhas tarefas vs Todas */}
-                      <div className="bg-amber-50/70 px-4 py-2 border-b border-amber-200/60 flex items-center justify-between text-xs">
-                        <span className="font-extrabold text-amber-950 flex items-center gap-1.5">
-                          <Hourglass className="w-3.5 h-3.5 text-amber-600" />
-                          Tarefas com prazo nas próximas 24h:
-                        </span>
-                        <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-amber-300 text-[11px] font-bold">
-                          <button
-                            onClick={() => setReminderFilterScope('TODAS')}
-                            className={`px-2 py-0.5 rounded cursor-pointer ${
-                              reminderFilterScope === 'TODAS'
-                                ? 'bg-slate-900 text-white'
-                                : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                          >
-                            Equipe ({reminders24hData.totalCount})
-                          </button>
-                          <button
-                            onClick={() => setReminderFilterScope('MINHAS')}
-                            className={`px-2 py-0.5 rounded cursor-pointer ${
-                              reminderFilterScope === 'MINHAS'
-                                ? 'bg-amber-500 text-slate-950 font-black'
-                                : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                          >
-                            Minhas ({reminders24hData.myCount})
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="max-h-96 overflow-y-auto divide-y divide-slate-100">
-                        {reminders24hData.urgentItems.filter((i) =>
-                          reminderFilterScope === 'MINHAS' ? i.isMine : true
-                        ).length === 0 ? (
-                          <div className="p-8 text-center space-y-2">
-                            <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-                            <p className="text-xs font-bold text-slate-700">
-                              Nenhuma tarefa com prazo para as próximas 24 horas!
-                            </p>
-                            <p className="text-[11px] text-slate-400">
-                              Todas as obrigações imediatas estão em dia ou concluídas.
-                            </p>
-                            {dismissedReminderIds.length > 0 && (
-                              <button
-                                onClick={handleResetDismissedReminders}
-                                className="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer pt-1"
-                              >
-                                Reexibir {dismissedReminderIds.length} lembrete(s) dispensado(s)
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          reminders24hData.urgentItems
-                            .filter((i) => (reminderFilterScope === 'MINHAS' ? i.isMine : true))
-                            .map((item) => {
-                              const t = item.task;
-                              const member = TEAM_MEMBERS.find((m) => m.id === t.assignee) || TEAM_MEMBERS[0];
-                              return (
-                                <div
-                                  key={t.id}
-                                  className="p-3.5 hover:bg-slate-50 transition-colors space-y-2 text-xs"
-                                >
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                      <span className="px-2 py-0.5 rounded bg-slate-900 text-white font-mono font-bold text-[10px]">
-                                        {t.code}
-                                      </span>
-                                      <span
-                                        className={`px-2 py-0.5 rounded-md text-[10px] font-black ${item.urgencyBadge}`}
-                                      >
-                                        {item.countdownLabel}
-                                      </span>
-                                      {t.isCritical && (
-                                        <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-extrabold border border-rose-200">
-                                          Crítica
-                                        </span>
-                                      )}
-                                    </div>
-                                    <button
-                                      onClick={(e) => handleDismissReminder(t.id, e)}
-                                      className="text-slate-400 hover:text-slate-700 p-0.5 rounded cursor-pointer"
-                                      title="Dispensar este alerta"
-                                    >
-                                      <X className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-
-                                  <button
-                                    onClick={() => {
-                                      setSelectedTaskId(t.id);
-                                      setShowNotifications(false);
-                                    }}
-                                    className="text-left font-bold text-slate-900 hover:text-indigo-600 block line-clamp-2 cursor-pointer"
-                                  >
-                                    {t.title}
-                                  </button>
-
-                                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                                    <div className="flex items-center gap-1.5">
-                                      <span
-                                        className={`w-5 h-5 rounded-full ${member.color} text-white text-[9px] font-extrabold flex items-center justify-center`}
-                                      >
-                                        {member.avatar}
-                                      </span>
-                                      <span className="font-bold text-slate-800">@{t.assignee}</span>
-                                      <span>• Filiais: {item.branchStats.percent}%</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-1">
-                                      {t.status !== 'EM_ANDAMENTO' && t.status !== 'CONCLUIDA' && (
-                                        <button
-                                          onClick={() => handleStartTask(t)}
-                                          className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                                        >
-                                          <Play className="w-2.5 h-2.5 fill-white" /> Iniciar
-                                        </button>
-                                      )}
-                                      {t.status !== 'CONCLUIDA' && (
-                                        <button
-                                          onClick={() => handleCompleteTask(t)}
-                                          className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                                          title="Concluir Obrigação"
-                                        >
-                                          <Check className="w-3 h-3" /> Concluir
-                                        </button>
-                                      )}
-                                      <button
-                                        onClick={() => {
-                                          setSelectedTaskId(t.id);
-                                          setShowNotifications(false);
-                                        }}
-                                        className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold cursor-pointer"
-                                      >
-                                        Abrir
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })
-                        )}
-                      </div>
-
-                      {/* Footer com atalho para o Painel de SLA e Central de Lembretes */}
-                      <div className="bg-slate-50 p-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
-                        <button
-                          onClick={() => {
-                            setIsReminderModalOpen(true);
-                            setShowNotifications(false);
-                          }}
-                          className="font-extrabold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <AlarmClock className="w-3.5 h-3.5" />
-                          <span>Ver Central de Lembretes Completa</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setActiveTab('ANALISE_SLA');
-                            setAnalysisSlaFilter('VENCE_HOJE');
-                            setShowNotifications(false);
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] cursor-pointer"
-                        >
-                          Filtrar no Painel →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* CONTEÚDO DA TAB: MENÇÕES (@) */}
-                  {notificationTab === 'MENCOES' && (
-                    <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                      {myNotifications.length === 0 ? (
-                        <div className="p-6 text-center text-xs text-slate-400">
-                          Nenhuma menção ou pendência transferida para você.
-                        </div>
-                      ) : (
-                        myNotifications.map((n) => (
-                          <div key={n.id} className="p-3 hover:bg-slate-50 text-xs space-y-1">
-                            <div className="flex items-center justify-between font-bold text-purple-800">
-                              <span>[{n.taskCode}] de @{n.user}</span>
-                              <span className="text-[10px] text-slate-400">
-                                {new Date(n.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-                            <p className="text-slate-700">{renderFormattedText(n.details)}</p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
+              {/* SELETOR DE OPERADOR ATIVO NO DESKTOP */}
+              <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-700/80 rounded-lg sm:rounded-xl px-2 py-1 text-xs">
+                <div className={`w-5 h-5 rounded-md ${activeMemberObj.color} text-white font-bold text-[10px] flex items-center justify-center shrink-0`}>
+                  {activeMemberObj.avatar}
                 </div>
+                <div className="text-left">
+                  <div className="hidden xl:block text-[9px] text-slate-400 leading-none">
+                    Operador:
+                  </div>
+                  <select
+                    value={currentUser}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCurrentUser(val);
+                      const member = TEAM_MEMBERS.find((m) => m.id === val);
+                      if (member) {
+                        const cat = (member.category || 'ANALISTA') as 'ADMINISTRADOR' | 'COORDENADOR' | 'ANALISTA';
+                        handleSelectRoleView(cat, val);
+                      }
+                    }}
+                    className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer max-w-[80px] sm:max-w-[120px] truncate"
+                  >
+                    {TEAM_MEMBERS.map((m) => (
+                      <option key={m.id} value={m.id} className="bg-slate-900 text-white">
+                        @{m.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {fbUser && (
+                <button
+                  onClick={handleGoogleSignOut}
+                  className="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer"
+                  title={`Conectado como ${fbUser.email} • Clique para sair`}
+                >
+                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
               )}
             </div>
-
-            {/* SELETOR DE CARTEIRA EXIBIDA (FILTRO DE TAREFAS POR INTEGRANTE) */}
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5" title="Filtrar tarefas exibidas pela carteira de um integrante ou ver toda a equipe">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/90 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                <Users className="w-3.5 h-3.5 text-indigo-100" />
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] text-slate-400 leading-none">
-                  Carteira Exibida:
-                </div>
-                <select
-                  value={activeOperatorFilter}
-                  onChange={(e) => setActiveOperatorFilter(e.target.value)}
-                  className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer"
-                >
-                  <option value="TODOS" className="bg-slate-900 text-white">
-                    👥 Toda a Equipe ({TEAM_MEMBERS.length} integrantes)
-                  </option>
-                  {TEAM_MEMBERS.map((m) => (
-                    <option key={m.id} value={m.id} className="bg-slate-900 text-white">
-                      Somente @{m.name} ({USER_CATEGORIES_CONFIG[m.category || 'ANALISTA']?.shortLabel || 'Analista'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* SELETOR DE OPERADOR ATIVO SINCRONIZADO COM A CATEGORIA */}
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5">
-              <div className={`w-7 h-7 rounded-lg ${activeOperatorFilter === 'TODOS' ? 'bg-indigo-600' : activeMemberObj.color} text-white font-bold text-xs flex items-center justify-center`}>
-                {activeOperatorFilter === 'TODOS' ? activeMemberObj.avatar : activeMemberObj.avatar}
-              </div>
-              <div className="text-left">
-                <div className="text-[10px] text-slate-400 leading-none flex items-center gap-1">
-                  <span>Operador:</span>
-                  <span className="text-emerald-400 font-bold">
-                    {USER_CATEGORIES_CONFIG[activeMemberObj.category || 'ANALISTA']?.shortLabel || 'Analista'}
-                  </span>
-                </div>
-                <select
-                  value={currentUser}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setCurrentUser(val);
-                    const member = TEAM_MEMBERS.find((m) => m.id === val);
-                    if (member) {
-                      const cat = (member.category || 'ANALISTA') as 'ADMINISTRADOR' | 'COORDENADOR' | 'ANALISTA';
-                      handleSelectRoleView(cat, val);
-                    }
-                  }}
-                  className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer"
-                >
-                  {TEAM_MEMBERS.map((m) => (
-                    <option key={m.id} value={m.id} className="bg-slate-900 text-white">
-                      @{m.name} ({USER_CATEGORIES_CONFIG[m.category || 'ANALISTA']?.shortLabel || 'Analista'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {fbUser && (
-              <button
-                onClick={handleGoogleSignOut}
-                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer"
-                title={`Conectado como ${fbUser.email} • Clique para sair`}
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
           </div>
         </div>
+
+        {/* DROPDOWN DE NOTIFICAÇÕES (Posicionado com segurança abaixo do header sem estourar a tela no mobile) */}
+        {showNotifications && (
+          <div className="absolute right-2 sm:right-6 top-full mt-1 w-[calc(100vw-16px)] sm:w-[460px] max-w-sm sm:max-w-md bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Cabeçalho do Dropdown com Tabs */}
+            <div className="bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-1.5 p-0.5 bg-slate-950 rounded-xl border border-slate-800">
+                <button
+                  onClick={() => setNotificationTab('LEMBRETES')}
+                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    notificationTab === 'LEMBRETES'
+                      ? 'bg-amber-500 text-slate-950 shadow-xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <AlarmClock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span>Lembretes 24h</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                      notificationTab === 'LEMBRETES' ? 'bg-slate-900 text-amber-300' : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {reminders24hData.totalCount}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setNotificationTab('MENCOES')}
+                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    notificationTab === 'MENCOES'
+                      ? 'bg-purple-600 text-white shadow-xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <AtSign className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span>Menções (@)</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                      notificationTab === 'MENCOES' ? 'bg-purple-900 text-purple-200' : 'bg-slate-800 text-slate-300'
+                    }`}
+                  >
+                    {myNotifications.length}
+                  </span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowNotifications(false)}
+                className="text-slate-400 hover:text-white cursor-pointer p-1 rounded-lg hover:bg-slate-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* CONTEÚDO DA TAB: LEMBRETES 24H */}
+            {notificationTab === 'LEMBRETES' && (
+              <div>
+                {/* Sub-filtro: Minhas tarefas vs Todas */}
+                <div className="bg-amber-50/70 px-4 py-2 border-b border-amber-200/60 flex items-center justify-between text-xs">
+                  <span className="font-extrabold text-amber-950 flex items-center gap-1.5">
+                    <Hourglass className="w-3.5 h-3.5 text-amber-600" />
+                    Tarefas nas próximas 24h:
+                  </span>
+                  <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-amber-300 text-[11px] font-bold">
+                    <button
+                      onClick={() => setReminderFilterScope('TODAS')}
+                      className={`px-2 py-0.5 rounded cursor-pointer ${
+                        reminderFilterScope === 'TODAS'
+                          ? 'bg-slate-900 text-white'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Equipe ({reminders24hData.totalCount})
+                    </button>
+                    <button
+                      onClick={() => setReminderFilterScope('MINHAS')}
+                      className={`px-2 py-0.5 rounded cursor-pointer ${
+                        reminderFilterScope === 'MINHAS'
+                          ? 'bg-amber-500 text-slate-950 font-black'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Minhas ({reminders24hData.myCount})
+                    </button>
+                  </div>
+                </div>
+
+                <div className="max-h-96 overflow-y-auto divide-y divide-slate-100">
+                  {reminders24hData.urgentItems.filter((i) =>
+                    reminderFilterScope === 'MINHAS' ? i.isMine : true
+                  ).length === 0 ? (
+                    <div className="p-8 text-center space-y-2">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+                      <p className="text-xs font-bold text-slate-700">
+                        Nenhuma tarefa com prazo para as próximas 24 horas!
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Todas as obrigações imediatas estão em dia ou concluídas.
+                      </p>
+                      {dismissedReminderIds.length > 0 && (
+                        <button
+                          onClick={handleResetDismissedReminders}
+                          className="text-[11px] font-bold text-indigo-600 hover:underline cursor-pointer pt-1"
+                        >
+                          Reexibir {dismissedReminderIds.length} lembrete(s) dispensado(s)
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    reminders24hData.urgentItems
+                      .filter((i) => (reminderFilterScope === 'MINHAS' ? i.isMine : true))
+                      .map((item) => {
+                        const t = item.task;
+                        const member = TEAM_MEMBERS.find((m) => m.id === t.assignee) || TEAM_MEMBERS[0];
+                        return (
+                          <div
+                            key={t.id}
+                            className="p-3.5 hover:bg-slate-50 transition-colors space-y-2 text-xs"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="px-2 py-0.5 rounded bg-slate-900 text-white font-mono font-bold text-[10px]">
+                                  {t.code}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-md text-[10px] font-black ${item.urgencyBadge}`}
+                                >
+                                  {item.countdownLabel}
+                                </span>
+                                {t.isCritical && (
+                                  <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-extrabold border border-rose-200">
+                                    Crítica
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                onClick={(e) => handleDismissReminder(t.id, e)}
+                                className="text-slate-400 hover:text-slate-700 p-0.5 rounded cursor-pointer"
+                                title="Dispensar este alerta"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={() => {
+                                setSelectedTaskId(t.id);
+                                setShowNotifications(false);
+                              }}
+                              className="text-left font-bold text-slate-900 hover:text-indigo-600 block line-clamp-2 cursor-pointer"
+                            >
+                              {t.title}
+                            </button>
+
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className={`w-5 h-5 rounded-full ${member.color} text-white text-[9px] font-extrabold flex items-center justify-center`}
+                                >
+                                  {member.avatar}
+                                </span>
+                                <span className="font-bold text-slate-800">@{t.assignee}</span>
+                                <span>• Filiais: {item.branchStats.percent}%</span>
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                {t.status !== 'EM_ANDAMENTO' && t.status !== 'CONCLUIDA' && (
+                                  <button
+                                    onClick={() => handleStartTask(t)}
+                                    className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Play className="w-2.5 h-2.5 fill-white" /> Iniciar
+                                  </button>
+                                )}
+                                {t.status !== 'CONCLUIDA' && (
+                                  <button
+                                    onClick={() => handleCompleteTask(t)}
+                                    className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                                    title="Concluir Obrigação"
+                                  >
+                                    <Check className="w-3 h-3" /> Concluir
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    setSelectedTaskId(t.id);
+                                    setShowNotifications(false);
+                                  }}
+                                  className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold cursor-pointer"
+                                >
+                                  Abrir
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                  )}
+                </div>
+
+                {/* Footer com atalho para o Painel de SLA e Central de Lembretes */}
+                <div className="bg-slate-50 p-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
+                  <button
+                    onClick={() => {
+                      setIsReminderModalOpen(true);
+                      setShowNotifications(false);
+                    }}
+                    className="font-extrabold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <AlarmClock className="w-3.5 h-3.5" />
+                    <span>Ver Central de Lembretes Completa</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab('ANALISE_SLA');
+                      setAnalysisSlaFilter('VENCE_HOJE');
+                      setShowNotifications(false);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] cursor-pointer"
+                  >
+                    Filtrar no Painel →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* CONTEÚDO DA TAB: MENÇÕES (@) */}
+            {notificationTab === 'MENCOES' && (
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                {myNotifications.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-400">
+                    Nenhuma menção ou pendência transferida para você.
+                  </div>
+                ) : (
+                  myNotifications.map((n) => (
+                    <div key={n.id} className="p-3 hover:bg-slate-50 text-xs space-y-1">
+                      <div className="flex items-center justify-between font-bold text-purple-800">
+                        <span>[{n.taskCode}] de @{n.user}</span>
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(n.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-slate-700">{renderFormattedText(n.details)}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* ==========================================
@@ -5150,16 +5214,16 @@ export default function App() {
         {/* WORKSPACE PRINCIPAL */}
         <div className="flex-1 min-w-0 overflow-y-auto flex flex-col">
           {/* Sub-header Dinâmico com Troca Rápida de Visão, Radar do Perfil e Métricas */}
-          <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs sticky top-0 z-20">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white font-extrabold flex items-center gap-1.5 shadow-2xs">
+          <div className="bg-white border-b border-slate-200 px-3 sm:px-6 py-1.5 sm:py-2 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shadow-2xs">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
+              <span className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-slate-900 text-white font-extrabold flex items-center gap-1.5 shadow-2xs text-[11px] sm:text-xs shrink-0">
                 {(() => {
                   const currTab = roleTabs.find((t) => t.id === activeTab);
                   if (currTab) {
                     const Icon = currTab.icon;
                     return (
                       <>
-                        <Icon className="w-3.5 h-3.5 text-emerald-400" />
+                        <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
                         <span>{currTab.label}</span>
                       </>
                     );
@@ -5169,7 +5233,7 @@ export default function App() {
               </span>
 
               {/* Seletor Dinâmico de Modo de Operação (Acesso em 1 clique) */}
-              <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -5239,22 +5303,23 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
               {/* Botão de Expansão do Radar do Perfil (Admin / Coordenador / Analista) */}
               <button
                 type="button"
                 onClick={() => setIsRoleOverviewExpanded((prev) => !prev)}
-                className={`px-2.5 py-1 rounded-lg border font-bold text-[11px] flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-2 sm:px-2.5 py-1 rounded-lg border font-bold text-[10px] sm:text-[11px] flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shrink-0 ${
                   isRoleOverviewExpanded
                     ? 'bg-slate-900 text-white border-slate-900'
                     : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                 }`}
                 title="Expandir ou recolher o painel resumo do perfil e carga da equipe"
               >
-                <Users className="w-3.5 h-3.5 text-indigo-500" />
-                <span>
-                  Radar {activeRoleView === 'ADMINISTRADOR' ? 'Admin' : activeRoleView === 'COORDENADOR' ? 'Coordenador' : 'Analista'}
+                <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-500" />
+                <span className="hidden xs:inline">
+                  Radar {activeRoleView === 'ADMINISTRADOR' ? 'Admin' : activeRoleView === 'COORDENADOR' ? 'Coord' : 'Analista'}
                 </span>
+                <span className="xs:hidden">Radar</span>
                 <span className="text-[10px] opacity-75">{isRoleOverviewExpanded ? '▲' : '▼'}</span>
               </button>
 
@@ -5264,12 +5329,12 @@ export default function App() {
                   setActiveTab('LISTA');
                   setStatusFilter('EM_ANDAMENTO');
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer shrink-0"
                 title="Filtrar tarefas em andamento"
               >
-                <Play className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
-                <span className="text-blue-800 hidden sm:inline">Em Andamento:</span>
-                <span className="font-bold text-blue-900 tabular-nums">
+                <Play className="w-3 h-3 text-blue-600 fill-blue-600" />
+                <span className="text-blue-800 hidden md:inline text-[11px]">Em Andamento:</span>
+                <span className="font-bold text-blue-900 tabular-nums text-xs">
                   {kpis.emAndamento}
                 </span>
               </button>
@@ -5283,31 +5348,30 @@ export default function App() {
                     setStatusFilter('AGUARDANDO_DEPENDENCIA');
                   }
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer shrink-0"
                 title="Filtrar tarefas aguardando dependência (@)"
               >
-                <ArrowRightLeft className="w-3.5 h-3.5 text-purple-600" />
-                <span className="text-purple-800 hidden sm:inline">Dep. (@):</span>
-                <span className="font-bold text-purple-900 tabular-nums">
+                <ArrowRightLeft className="w-3 h-3 text-purple-600" />
+                <span className="text-purple-800 hidden md:inline text-[11px]">Dep. (@):</span>
+                <span className="font-bold text-purple-900 tabular-nums text-xs">
                   {activeRoleView === 'ANALISTA' ? kpis.dependenciaComigo : kpis.aguardandoDep}
                 </span>
               </button>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="font-bold text-emerald-900 tabular-nums">
+              <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 shrink-0">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                <span className="font-bold text-emerald-900 tabular-nums text-xs">
                   {activeRoleView === 'ANALISTA'
-                    ? `${myPersonalMetrics.concluidas}/${myPersonalMetrics.totalAssigned} (${
-                        myPersonalMetrics.totalAssigned > 0
-                          ? Math.round((myPersonalMetrics.concluidas / myPersonalMetrics.totalAssigned) * 100)
-                          : 0
-                      }%)`
-                    : `${kpis.concluidas}/${kpis.total} (${kpis.percentConcluido}%)`}
+                    ? `${myPersonalMetrics.concluidas}/${myPersonalMetrics.totalAssigned}`
+                    : `${kpis.concluidas}/${kpis.total}`}
+                  <span className="hidden sm:inline font-normal text-emerald-700 ml-1">
+                    ({activeRoleView === 'ANALISTA' ? myPersonalMetrics.percent : kpis.percentConcluido}%)
+                  </span>
                 </span>
               </div>
             </div>
           </div>
 
-          <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-4 space-y-4">
+          <main className="flex-1 max-w-[1600px] w-full mx-auto px-2.5 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4 overflow-x-hidden">
         {/* ========================================================
             BARRA COMPACTA E DINÂMICA DE ALERTA 24 HORAS / VENCIMENTO
         ======================================================== */}
@@ -5317,26 +5381,26 @@ export default function App() {
               reminders24hData.overdueCount > 0
                 ? 'bg-gradient-to-r from-rose-950 via-slate-900 to-slate-900 border-rose-500/70'
                 : 'bg-gradient-to-r from-amber-950 via-slate-900 to-slate-900 border-amber-500/70'
-            } text-white shadow-sm px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2.5`}
+            } text-white shadow-sm px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-between gap-2`}
           >
-            <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider shrink-0 ${
+                className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider shrink-0 ${
                   reminders24hData.overdueCount > 0
                     ? 'bg-rose-500 text-white'
                     : 'bg-amber-400 text-slate-950'
                 }`}
               >
-                <AlarmClock className="w-3.5 h-3.5 animate-pulse" />
+                <AlarmClock className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-pulse" />
                 <span>
                   {reminders24hData.overdueCount > 0
-                    ? `${reminders24hData.overdueCount} Vencida(s) + ${reminders24hData.expiring24hCount} em 24h`
-                    : `${reminders24hData.totalCount} Prazo(s) em 24h`}
+                    ? `${reminders24hData.overdueCount} Vencida(s)`
+                    : `${reminders24hData.totalCount} em 24h`}
                 </span>
               </span>
 
               {reminders24hData.myCount > 0 && (
-                <span className="px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-200 border border-amber-400/40 text-[11px] font-bold shrink-0">
+                <span className="hidden xs:inline-flex px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-200 border border-amber-400/40 text-[10px] sm:text-[11px] font-bold shrink-0">
                   {reminders24hData.myCount} com @{currentUser}
                 </span>
               )}
@@ -5368,10 +5432,10 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsReminderModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] sm:text-xs flex items-center gap-1 transition-all cursor-pointer"
               >
-                <BellRing className="w-3.5 h-3.5" />
-                <span>Central 24h ({reminders24hData.totalCount})</span>
+                <BellRing className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>Central ({reminders24hData.totalCount})</span>
               </button>
               <button
                 type="button"
@@ -5379,14 +5443,14 @@ export default function App() {
                   setActiveTab('ANALISE_SLA');
                   setAnalysisSlaFilter('VENCE_HOJE');
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all cursor-pointer hidden sm:inline-flex items-center gap-1"
+                className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] sm:text-xs border border-slate-700 transition-all cursor-pointer hidden sm:inline-flex items-center gap-1"
               >
-                <span>Painel SLA</span>
+                <span>SLA</span>
               </button>
               <button
                 type="button"
                 onClick={() => setIsReminderBannerDismissed(true)}
-                className="p-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+                className="p-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
                 title="Ocultar barra de alerta"
               >
                 <X className="w-3.5 h-3.5" />
@@ -5798,90 +5862,90 @@ export default function App() {
 
         {/* CARDS DE STATUS RÁPIDOS GLOBAIS (Exibidos nas Visões Operacionais de Tarefas) */}
         {(['LISTA', 'MATRIZ', 'KANBAN', 'AVULSAS'].includes(activeTab)) && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1 sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:gap-2.5">
           <div
             onClick={() => { setStatusFilter('TODOS'); setQuickFilter('TODAS'); }}
-            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'TODOS' && quickFilter === 'TODAS' ? 'ring-2 ring-slate-900 border-slate-900' : 'border-slate-200'}`}
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm shrink-0 min-w-[130px] sm:min-w-0 ${statusFilter === 'TODOS' && quickFilter === 'TODAS' ? 'ring-2 ring-slate-900 border-slate-900' : 'border-slate-200'}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
-              <span>TOTAL OBRIGAÇÕES</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-slate-500">
+              <span>OBRIGAÇÕES</span>
               <Layers className="w-3.5 h-3.5 text-slate-400" />
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-xl font-extrabold text-slate-900 tabular-nums">{kpis.total}</span>
-              <span className="text-[10px] text-slate-500">{kpis.fechamentoCount} Fech. + {kpis.avulsasCount} Avul.</span>
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums">{kpis.total}</span>
+              <span className="text-[9px] sm:text-[10px] text-slate-500">{kpis.fechamentoCount}F + {kpis.avulsasCount}A</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('EM_ANDAMENTO'); setQuickFilter('TODAS'); }}
-            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'EM_ANDAMENTO' ? 'ring-2 ring-blue-600 border-blue-600' : 'border-blue-200'}`}
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm shrink-0 min-w-[130px] sm:min-w-0 ${statusFilter === 'EM_ANDAMENTO' ? 'ring-2 ring-blue-600 border-blue-600' : 'border-blue-200'}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-bold text-blue-700">
-              <span>INICIADAS / ATIVAS</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-blue-700">
+              <span>EM ANDAMENTO</span>
               <Play className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-xl font-extrabold text-blue-700 tabular-nums">{kpis.emAndamento}</span>
-              <span className="text-[10px] font-semibold text-blue-600 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" /> Timer ON
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-extrabold text-blue-700 tabular-nums">{kpis.emAndamento}</span>
+              <span className="text-[9px] sm:text-[10px] font-semibold text-blue-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" /> Ativo
               </span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('PAUSADA'); setQuickFilter('TODAS'); }}
-            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'PAUSADA' ? 'ring-2 ring-amber-500 border-amber-500' : 'border-amber-200'}`}
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm shrink-0 min-w-[130px] sm:min-w-0 ${statusFilter === 'PAUSADA' ? 'ring-2 ring-amber-500 border-amber-500' : 'border-amber-200'}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-bold text-amber-800">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-amber-800">
               <span>PAUSADAS</span>
               <Pause className="w-3.5 h-3.5 text-amber-600" />
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-xl font-extrabold text-amber-700 tabular-nums">{kpis.pausadas}</span>
-              <span className="text-[10px] text-amber-700">Tempo salvo</span>
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-extrabold text-amber-700 tabular-nums">{kpis.pausadas}</span>
+              <span className="text-[9px] sm:text-[10px] text-amber-700">Salvo</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('AGUARDANDO_DEPENDENCIA'); setQuickFilter('TODAS'); }}
-            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'AGUARDANDO_DEPENDENCIA' ? 'ring-2 ring-purple-600 border-purple-600' : 'border-purple-200'}`}
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm shrink-0 min-w-[130px] sm:min-w-0 ${statusFilter === 'AGUARDANDO_DEPENDENCIA' ? 'ring-2 ring-purple-600 border-purple-600' : 'border-purple-200'}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-bold text-purple-800">
-              <span>DEPENDÊNCIA (@)</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-purple-800">
+              <span>DEP. (@)</span>
               <ArrowRightLeft className="w-3.5 h-3.5 text-purple-600" />
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-xl font-extrabold text-purple-700 tabular-nums">{kpis.aguardandoDep}</span>
-              <span className="text-[10px] font-bold text-purple-700">{kpis.dependenciaComigo} p/ @{currentUser}</span>
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-extrabold text-purple-700 tabular-nums">{kpis.aguardandoDep}</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-purple-700">{kpis.dependenciaComigo} p/ mim</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('PENDENTE'); setQuickFilter('TODAS'); }}
-            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'PENDENTE' ? 'ring-2 ring-slate-500 border-slate-500' : 'border-slate-200'}`}
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm shrink-0 min-w-[130px] sm:min-w-0 ${statusFilter === 'PENDENTE' ? 'ring-2 ring-slate-500 border-slate-500' : 'border-slate-200'}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
-              <span>NÃO INICIADAS</span>
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-slate-600">
+              <span>PENDENTES</span>
               <Clock className="w-3.5 h-3.5 text-slate-400" />
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-xl font-extrabold text-slate-700 tabular-nums">{kpis.pendentes}</span>
-              <span className="text-[10px] text-slate-500">Na fila</span>
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-extrabold text-slate-700 tabular-nums">{kpis.pendentes}</span>
+              <span className="text-[9px] sm:text-[10px] text-slate-500">Na fila</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('CONCLUIDA'); setQuickFilter('TODAS'); }}
-            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'CONCLUIDA' ? 'ring-2 ring-emerald-600 border-emerald-600' : 'border-emerald-200'}`}
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm shrink-0 min-w-[130px] sm:min-w-0 ${statusFilter === 'CONCLUIDA' ? 'ring-2 ring-emerald-600 border-emerald-600' : 'border-emerald-200'}`}
           >
-            <div className="flex items-center justify-between text-[11px] font-bold text-emerald-800">
+            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-emerald-800">
               <span>CONCLUÍDAS</span>
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             </div>
-            <div className="mt-1.5 flex items-baseline justify-between">
-              <span className="text-xl font-extrabold text-emerald-700 tabular-nums">{kpis.concluidas}</span>
-              <span className="text-[10px] font-bold text-emerald-700">{kpis.percentConcluido}% entregue</span>
+            <div className="mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-extrabold text-emerald-700 tabular-nums">{kpis.concluidas}</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-emerald-700">{kpis.percentConcluido}%</span>
             </div>
           </div>
         </div>
@@ -5892,45 +5956,48 @@ export default function App() {
         ========================================== */}
         {activeTab === 'CADASTRO_PADRAO' && (
           <div className="space-y-4">
-            <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-900 text-white rounded-2xl p-5 border border-indigo-800/60 shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-900 text-white rounded-2xl p-6 border border-indigo-800/60 shadow-md space-y-4">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>Catálogo Mestre de Padronização Contábil & Fiscal</span>
                 </div>
-                <h2 className="text-base sm:text-lg font-extrabold text-white">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
                   Cadastro de Tarefas Padrão de Fechamento ({taskTemplates.length} Obrigações Recorrentes)
                 </h2>
-                <p className="text-xs text-slate-300 max-w-3xl">
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-4xl">
                   Padronização estruturada por <strong>Departamento (Contábil / Fiscal)</strong>, <strong>Grupo</strong>, <strong>Sub-Grupo</strong>, <strong>Descrição da Tarefa</strong>, <strong>Competência (Mensal ou Anual)</strong>, <strong>Vencimento</strong> e <strong>Recorrência (Esporádica, Mensal, Trimestral, Anual)</strong>.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                <button
-                  onClick={() => setActiveTab('CHECKLIST_TEMPLATES')}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
-                  title="Biblioteca de Modelos de Checklist Customizados & Reutilizáveis"
-                >
-                  <CheckSquare className="w-4 h-4" />
-                  <span>Modelos de Checklist ({checklistTemplates.length})</span>
-                </button>
-                <button
-                  onClick={() => openAutoGenerateModal('11', '2026')}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-sm transition-all cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>Gerar Tarefas p/ Próximo Mês (Automático)</span>
-                </button>
-                {unlaunchedTemplatesCount > 0 && (
+              <div className="pt-3 border-t border-indigo-800/50 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <button
-                    onClick={handleGenerateMissingClosingTasks}
-                    className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-sm transition-all cursor-pointer"
+                    onClick={() => setActiveTab('CHECKLIST_TEMPLATES')}
+                    className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                    title="Biblioteca de Modelos de Checklist Customizados & Reutilizáveis"
                   >
-                    <CopyPlus className="w-4 h-4" />
-                    <span>Gerar Faltantes ({unlaunchedTemplatesCount})</span>
+                    <CheckSquare className="w-4 h-4" />
+                    <span>Modelos de Checklist ({checklistTemplates.length})</span>
                   </button>
-                )}
+                  <button
+                    onClick={() => openAutoGenerateModal('11', '2026')}
+                    className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shadow-sm transition-all cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Gerar Tarefas p/ Próximo Mês (Automático)</span>
+                  </button>
+                  {unlaunchedTemplatesCount > 0 && (
+                    <button
+                      onClick={handleGenerateMissingClosingTasks}
+                      className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-sm transition-all cursor-pointer"
+                    >
+                      <CopyPlus className="w-4 h-4" />
+                      <span>Gerar Faltantes ({unlaunchedTemplatesCount})</span>
+                    </button>
+                  )}
+                </div>
+
                 <button
                   onClick={openCreateTemplateModal}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
@@ -7464,7 +7531,7 @@ export default function App() {
                       setSelectedSingleCompany(e.target.value);
                       setCompanyScopeMode('SINGLE');
                     }}
-                    className="bg-transparent text-slate-800 text-xs font-mono font-bold px-2 py-1 focus:outline-none cursor-pointer max-w-[240px] truncate"
+                    className="bg-transparent text-slate-800 text-xs font-mono font-bold px-2 py-1 focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[240px] truncate"
                   >
                     {BRANCH_CODES.map((code) => (
                       <option key={code} value={code} className="bg-white text-slate-900">
@@ -7648,10 +7715,11 @@ export default function App() {
 
               <button
                 onClick={() => openAutoGenerateModal('11', '2026')}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-extrabold transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-extrabold transition-all cursor-pointer shrink-0"
               >
                 <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Gerar Tarefas Recorrentes p/ Mês...</span>
+                <span className="sm:hidden">Gerar Lote</span>
+                <span className="hidden sm:inline">Gerar Tarefas Recorrentes p/ Mês...</span>
               </button>
             </div>
 
@@ -8056,131 +8124,139 @@ export default function App() {
                           : 'border-slate-200 border-l-slate-400'
                       }`}
                     >
-                      <div className="p-4 space-y-3">
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="p-3.5 sm:p-5 space-y-3 sm:space-y-3.5">
+                        {/* LINHA 1: CABEÇALHO DO CARD (Metadados e Status) */}
+                        <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
+                                task.category === 'AVULSA'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : 'bg-slate-900 text-white'
+                              }`}
+                            >
+                              {task.code}
+                            </span>
+
+                            <span className={`px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${deptBadgeCls}`}>
+                              {task.department || 'Contábil'}
+                            </span>
+
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold">
+                              {task.group || task.topic} ▸ {task.subGroup || task.accountingType}
+                            </span>
+
+                            <span className={`px-2 py-0.5 rounded-md border text-[10px] font-extrabold ${recCfg.badge}`}>
+                              ↻ {recCfg.label}
+                            </span>
+
+                            <span className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 border border-sky-200 text-[11px] font-bold font-mono">
+                              Comp: {task.competence || '10/2026'}
+                            </span>
+
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold font-mono">
+                              Venc: {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
+                            </span>
+
+                            {reminders24hData.remindersMap[task.id] && (
                               <span
-                                className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
-                                  task.category === 'AVULSA'
-                                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                                    : 'bg-slate-900 text-white'
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-black border animate-pulse ${
+                                  reminders24hData.remindersMap[task.id].isOverdue
+                                    ? 'bg-rose-100 text-rose-950 border-rose-400'
+                                    : 'bg-amber-100 text-amber-950 border-amber-400'
                                 }`}
+                                title={`Alerta 24h: ${reminders24hData.remindersMap[task.id].countdownLabel}`}
                               >
-                                {task.code}
+                                <AlarmClock className={`w-3.5 h-3.5 ${reminders24hData.remindersMap[task.id].isOverdue ? 'text-rose-700' : 'text-amber-700'}`} />
+                                <span>{reminders24hData.remindersMap[task.id].countdownLabel}</span>
                               </span>
-
-                              <span
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${st.bg} ${st.text} ${st.border}`}
-                              >
-                                <span className={`w-2 h-2 rounded-full ${st.dot}`} />
-                                {st.label}
-                              </span>
-
-                              <span className={`px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${deptBadgeCls}`}>
-                                {task.department || 'Contábil'}
-                              </span>
-
-                              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold">
-                                {task.group || task.topic} ▸ {task.subGroup || task.accountingType}
-                              </span>
-
-                              <span className={`px-2 py-0.5 rounded-md border text-[10px] font-extrabold ${recCfg.badge}`}>
-                                ↻ {recCfg.label}
-                              </span>
-
-                              <span className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 border border-sky-200 text-[11px] font-bold font-mono">
-                                Comp: {task.competence || '10/2026'}
-                              </span>
-
-                              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold font-mono">
-                                Venc: {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
-                              </span>
-
-                              {reminders24hData.remindersMap[task.id] && (
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-black border animate-pulse ${
-                                    reminders24hData.remindersMap[task.id].isOverdue
-                                      ? 'bg-rose-100 text-rose-950 border-rose-400'
-                                      : 'bg-amber-100 text-amber-950 border-amber-400'
-                                  }`}
-                                  title={`Alerta 24h: ${reminders24hData.remindersMap[task.id].countdownLabel}`}
-                                >
-                                  <AlarmClock className={`w-3.5 h-3.5 ${reminders24hData.remindersMap[task.id].isOverdue ? 'text-rose-700' : 'text-amber-700'}`} />
-                                  <span>{reminders24hData.remindersMap[task.id].countdownLabel}</span>
-                                </span>
-                              )}
-
-                              {singleBranchInfo && (
-                                <span
-                                  className={`px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border ${
-                                    BRANCH_STATUS_CHIP[singleBranchInfo.status]?.cls || ''
-                                  }`}
-                                >
-                                  Filial {selectedSingleCompany}:{' '}
-                                  {BRANCH_STATUS_CHIP[singleBranchInfo.status]?.label}
-                                </span>
-                              )}
-
-                              {task.isCritical && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                  <AlertTriangle className="w-3 h-3" /> Crítica
-                                </span>
-                              )}
-                            </div>
-
-                            {/* TÍTULO CLICÁVEL: Expande empresas na MESMA TELA (Acordeão) */}
-                            <div className="flex items-start gap-2">
-                              <button
-                                onClick={() =>
-                                  setExpandedTaskBranches((prev) => ({
-                                    ...prev,
-                                    [task.id]: !prev[task.id]
-                                  }))
-                                }
-                                className="text-left text-sm sm:text-base font-bold text-slate-900 hover:text-blue-700 transition-colors cursor-pointer flex items-center gap-2"
-                              >
-                                <span>{task.title}</span>
-                                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
-                                  {isGridExpanded ? 'Ocultar 40 filiais ▲' : '40 filiais ▼'}
-                                </span>
-                              </button>
-                            </div>
-
-                            {/* Banner de Dependência */}
-                            {isDep && task.dependencyInfo && (
-                              <div className="mt-2 p-2.5 rounded-lg bg-purple-50 border border-purple-200 flex items-start gap-2.5">
-                                <ArrowRightLeft className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
-                                <div className="text-xs text-purple-950 space-y-0.5">
-                                  <div className="font-bold flex flex-wrap items-center gap-1">
-                                    <span>Transferida por Dependência:</span>
-                                    <span className="px-1.5 py-0.2 rounded bg-purple-200 text-purple-900">
-                                      De @{task.dependencyInfo.fromUser}
-                                    </span>
-                                    <span>→</span>
-                                    <span className="px-1.5 py-0.2 rounded bg-purple-700 text-white">
-                                      Para @{task.dependencyInfo.toUser}
-                                    </span>
-                                  </div>
-                                  <p className="text-purple-900">{renderFormattedText(task.dependencyInfo.reason)}</p>
-                                </div>
-                              </div>
                             )}
 
-                            {/* Banner de Pausa */}
-                            {isPaused && task.pauseReason && (
-                              <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-2 text-xs text-amber-900">
-                                <Pause className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                                <span>
-                                  <strong>Motivo da Pausa:</strong> {renderFormattedText(task.pauseReason)}
-                                </span>
-                              </div>
+                            {singleBranchInfo && (
+                              <span
+                                className={`px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border ${
+                                  BRANCH_STATUS_CHIP[singleBranchInfo.status]?.cls || ''
+                                }`}
+                              >
+                                Filial {selectedSingleCompany}:{' '}
+                                {BRANCH_STATUS_CHIP[singleBranchInfo.status]?.label}
+                              </span>
+                            )}
+
+                            {task.isCritical && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                <AlertTriangle className="w-3 h-3" /> Crítica
+                              </span>
                             )}
                           </div>
 
-                          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 lg:gap-4 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
+                          {/* Status da Tarefa (Único e destacado no canto superior direito) */}
+                          <div className="shrink-0">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border shadow-2xs ${st.bg} ${st.text} ${st.border}`}>
+                              <span className={`w-2 h-2 rounded-full ${st.dot} ${isRunning ? 'animate-ping' : ''}`} />
+                              <span>{st.label}</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* LINHA 2: TÍTULO DA TAREFA E BANNERS (LARGURA TOTAL) */}
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                              {task.title}
+                            </h3>
+                            <button
+                              onClick={() =>
+                                setExpandedTaskBranches((prev) => ({
+                                  ...prev,
+                                  [task.id]: !prev[task.id]
+                                }))
+                              }
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
+                              title="Ver status nas 40 filiais"
+                            >
+                              <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>{isGridExpanded ? 'Ocultar 40 filiais ▲' : '40 filiais ▼'}</span>
+                            </button>
+                          </div>
+
+                          {/* Banner de Dependência */}
+                          {isDep && task.dependencyInfo && (
+                            <div className="p-3 rounded-xl bg-purple-50/90 border border-purple-200 flex items-start gap-2.5 shadow-2xs">
+                              <ArrowRightLeft className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
+                              <div className="text-xs text-purple-950 space-y-1 flex-1">
+                                <div className="font-bold flex flex-wrap items-center gap-1.5">
+                                  <span>Transferida por Dependência:</span>
+                                  <span className="px-2 py-0.5 rounded-md bg-purple-200 text-purple-900 font-semibold">
+                                    De @{task.dependencyInfo.fromUser}
+                                  </span>
+                                  <span>→</span>
+                                  <span className="px-2 py-0.5 rounded-md bg-purple-700 text-white font-semibold">
+                                    Para @{task.dependencyInfo.toUser}
+                                  </span>
+                                </div>
+                                <p className="text-purple-900 leading-relaxed">{renderFormattedText(task.dependencyInfo.reason)}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Banner de Pausa */}
+                          {isPaused && task.pauseReason && (
+                            <div className="p-3 rounded-xl bg-amber-50/90 border border-amber-200 flex items-center gap-2.5 text-xs text-amber-900 shadow-2xs">
+                              <Pause className="w-4 h-4 text-amber-700 shrink-0" />
+                              <span className="leading-relaxed">
+                                <strong>Motivo da Pausa:</strong> {renderFormattedText(task.pauseReason)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* LINHA 3: RODAPÉ DO CARD (Responsável, Progresso das 40 Empresas e Ações) */}
+                        <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                          {/* Responsável e Indicador de Progresso das Filiais */}
+                          <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-4 w-full sm:w-auto">
                             {/* Responsável */}
-                            <div className="flex items-center gap-2 min-w-[115px]">
+                            <div className="flex items-center gap-2">
                               <div className={`w-8 h-8 rounded-full ${member.color} text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0`}>
                                 {member.avatar}
                               </div>
@@ -8192,7 +8268,7 @@ export default function App() {
                               </div>
                             </div>
 
-                            {/* Botão Expansor de Filiais */}
+                            {/* Widget de Progresso 40 Filiais */}
                             <button
                               type="button"
                               onClick={() =>
@@ -8201,15 +8277,16 @@ export default function App() {
                                   [task.id]: !prev[task.id]
                                 }))
                               }
-                              className={`px-3 py-1.5 rounded-xl border text-left transition-all cursor-pointer min-w-[145px] ${
+                              className={`px-2.5 sm:px-3 py-1.5 rounded-xl border text-left transition-all cursor-pointer min-w-[130px] sm:min-w-[155px] ${
                                 isGridExpanded
-                                  ? 'bg-slate-900 text-white border-slate-900'
+                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                                   : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                               }`}
+                              title="Clique para abrir a matriz das 40 filiais"
                             >
                               <div className="flex items-center justify-between text-[11px] font-bold mb-1 tabular-nums">
                                 <span className="flex items-center gap-1">
-                                  <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+                                  <Building2 className={`w-3.5 h-3.5 ${isGridExpanded ? 'text-emerald-400' : 'text-emerald-500'}`} />
                                   {allBranchStats.ok + allBranchStats.na}/40 Emp.
                                 </span>
                                 <span>{allBranchStats.percent}%</span>
@@ -8220,94 +8297,86 @@ export default function App() {
                                   style={{ width: `${allBranchStats.percent}%` }}
                                 />
                               </div>
-                              <div className="text-[10px] opacity-75 mt-0.5 flex items-center justify-between tabular-nums">
+                              <div className="text-[10px] opacity-80 mt-0.5 flex items-center justify-between tabular-nums">
                                 <span>{allBranchStats.ok} OK • {allBranchStats.p} P</span>
                                 <span className="underline font-semibold">
                                   {isGridExpanded ? 'Ocultar ▲' : 'Selecionar ▼'}
                                 </span>
                               </div>
                             </button>
+                          </div>
 
-                            {/* Status da Tarefa */}
-                            <div className="text-center min-w-[120px]">
-                              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border shadow-2xs ${st.bg} ${st.text} ${st.border}`}>
-                                <span className={`w-2 h-2 rounded-full ${st.dot} ${isRunning ? 'animate-ping' : ''}`} />
-                                <span>{st.label}</span>
-                              </span>
-                            </div>
-
-                            {/* Botões de Ação */}
-                            <div className="flex items-center gap-1.5">
-                              {!isRunning && (
-                                <button
-                                  onClick={() => handleStartTask(task)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs cursor-pointer"
-                                  title={task.status === 'PAUSADA' ? 'Retomar Tarefa (Status: Em Andamento)' : 'Iniciar Tarefa (Status: Em Andamento)'}
-                                >
-                                  <Play className="w-3.5 h-3.5 fill-white" />
-                                  <span>{task.status === 'PAUSADA' ? 'Retomar' : 'Iniciar'}</span>
-                                </button>
-                              )}
-
-                              {isRunning && (
-                                <button
-                                  onClick={() => openPauseModal(task)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs cursor-pointer"
-                                  title="Pausar Tarefa"
-                                >
-                                  <Pause className="w-3.5 h-3.5 fill-white" />
-                                  <span>Pausar</span>
-                                </button>
-                              )}
-
+                          {/* Botões de Ação */}
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                            {!isRunning && (
                               <button
-                                onClick={() => openTransferModal(task)}
-                                className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 text-xs font-bold cursor-pointer"
-                                title="Transferir para outro usuário (@)"
+                                onClick={() => handleStartTask(task)}
+                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                                title={task.status === 'PAUSADA' ? 'Retomar Tarefa (Status: Em Andamento)' : 'Iniciar Tarefa (Status: Em Andamento)'}
                               >
-                                <AtSign className="w-3.5 h-3.5" />
-                                <span className="hidden xl:inline">Transferir</span>
+                                <Play className="w-3.5 h-3.5 fill-white" />
+                                <span>{task.status === 'PAUSADA' ? 'Retomar' : 'Iniciar'}</span>
                               </button>
+                            )}
 
-                              {!isDone ? (
-                                <div className="flex items-center gap-1">
+                            {isRunning && (
+                              <button
+                                onClick={() => openPauseModal(task)}
+                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                                title="Pausar Tarefa"
+                              >
+                                <Pause className="w-3.5 h-3.5 fill-white" />
+                                <span>Pausar</span>
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => openTransferModal(task)}
+                              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 border border-purple-300 text-xs font-bold transition-all cursor-pointer"
+                              title="Transferir para outro usuário (@)"
+                            >
+                              <AtSign className="w-3.5 h-3.5 text-purple-700" />
+                              <span>Transferir</span>
+                            </button>
+
+                            {!isDone ? (
+                              <div className="flex flex-1 sm:flex-initial items-center gap-1.5 sm:gap-2">
+                                <button
+                                  onClick={() => handleCompleteTask(task)}
+                                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                                  title="Concluir"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>Concluir</span>
+                                </button>
+                                {(task.status === 'EM_ANDAMENTO' || task.status === 'PAUSADA' || task.status === 'AGUARDANDO_DEPENDENCIA') && (
                                   <button
-                                    onClick={() => handleCompleteTask(task)}
-                                    className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs cursor-pointer"
-                                    title="Concluir"
+                                    onClick={() => handleReopenTask(task)}
+                                    className="flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-all cursor-pointer text-center"
+                                    title="Retornar para Pendente (Iniciado por engano)"
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span className="hidden xl:inline">Concluir</span>
+                                    Voltar Pendente
                                   </button>
-                                  {(task.status === 'EM_ANDAMENTO' || task.status === 'PAUSADA' || task.status === 'AGUARDANDO_DEPENDENCIA') && (
-                                    <button
-                                      onClick={() => handleReopenTask(task)}
-                                      className="px-2.5 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold cursor-pointer"
-                                      title="Retornar para Pendente (Iniciado por engano)"
-                                    >
-                                      Voltar Pendente
-                                    </button>
-                                  )}
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => handleReopenTask(task)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer"
-                                  title="Reabrir Tarefa"
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />
-                                  <span>Reabrir</span>
-                                </button>
-                              )}
-
+                                )}
+                              </div>
+                            ) : (
                               <button
-                                onClick={() => setSelectedTaskId(task.id)}
-                                className="px-2.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer"
-                                title="Abrir Detalhes e Checklists"
+                                onClick={() => handleReopenTask(task)}
+                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer"
+                                title="Reabrir Tarefa"
                               >
-                                Detalhes
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                <span>Reabrir</span>
                               </button>
-                            </div>
+                            )}
+
+                            <button
+                              onClick={() => setSelectedTaskId(task.id)}
+                              className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer text-center"
+                              title="Abrir Detalhes e Checklists"
+                            >
+                              Detalhes
+                            </button>
                           </div>
                         </div>
 
