@@ -1746,6 +1746,12 @@ export default function App() {
   const [dismissedReminderIds, setDismissedReminderIds] = useState<string[]>([]);
   const [reminderFilterScope, setReminderFilterScope] = useState<'TODAS' | 'MINHAS'>('TODAS');
 
+  // Estados de Usabilidade Dinâmica e Densidade de Tela
+  const [isRoleOverviewExpanded, setIsRoleOverviewExpanded] = useState(false);
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+  const [taskListDensity, setTaskListDensity] = useState<'CARDS' | 'TABELA'>('CARDS');
+
+
   // Persist locally on change
   useEffect(() => {
     try {
@@ -4935,7 +4941,9 @@ export default function App() {
 
       {/* ==========================================
           BARRA DE ESCOPO DE EMPRESA (TODAS vs INDIVIDUAL) + FILTRO DE OPERADOR
+          Exibida nas visões operacionais de tarefas e dashboard de filiais
       ========================================== */}
+      {(['LISTA', 'MATRIZ', 'KANBAN', 'AVULSAS', 'DASHBOARD'].includes(activeTab)) && (
       <div className="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-2">
         <div className="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -5043,6 +5051,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      )}
 
       {/* ==========================================
           LAYOUT PRINCIPAL: MENU LATERAL (SIDEBAR) & WORKSPACE
@@ -5270,18 +5279,17 @@ export default function App() {
 
         {/* WORKSPACE PRINCIPAL */}
         <div className="flex-1 min-w-0 overflow-y-auto flex flex-col">
-          {/* Sub-header com Métricas Rápidas & Breadcrumbs */}
-          <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-extrabold text-slate-500 uppercase tracking-wider">Visualizando:</span>
-              <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 font-extrabold text-indigo-950 flex items-center gap-1.5">
+          {/* Sub-header Dinâmico com Troca Rápida de Visão, Radar do Perfil e Métricas */}
+          <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs sticky top-0 z-20">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white font-extrabold flex items-center gap-1.5 shadow-2xs">
                 {(() => {
                   const currTab = roleTabs.find((t) => t.id === activeTab);
                   if (currTab) {
                     const Icon = currTab.icon;
                     return (
                       <>
-                        <Icon className="w-3.5 h-3.5 text-indigo-600" />
+                        <Icon className="w-3.5 h-3.5 text-emerald-400" />
                         <span>{currTab.label}</span>
                       </>
                     );
@@ -5289,33 +5297,130 @@ export default function App() {
                   return <span>Bancada de Tarefas</span>;
                 })()}
               </span>
+
+              {/* Seletor Dinâmico de Modo de Operação (Acesso em 1 clique) */}
+              <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('LISTA');
+                    setTaskListDensity('CARDS');
+                  }}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    (activeTab === 'LISTA' || activeTab === 'AVULSAS') && taskListDensity === 'CARDS'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <ListTodo className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Cards</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('LISTA');
+                    setTaskListDensity('TABELA');
+                  }}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    (activeTab === 'LISTA' || activeTab === 'AVULSAS') && taskListDensity === 'TABELA'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Tabela Rápida</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('MATRIZ')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    activeTab === 'MATRIZ'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Matriz 40 Filiais</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('KANBAN')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    activeTab === 'KANBAN'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Columns className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Kanban</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('ANALISE_SLA')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    activeTab === 'ANALISE_SLA'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                  <span>SLA & Prazos</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-100 border border-slate-200">
-                <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                <span className="text-slate-600">
-                  {activeRoleView === 'ANALISTA' ? `Tempo @${currentUser}:` : 'Tempo Equipe:'}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              {/* Botão de Expansão do Radar do Perfil (Admin / Coordenador / Analista) */}
+              <button
+                type="button"
+                onClick={() => setIsRoleOverviewExpanded((prev) => !prev)}
+                className={`px-2.5 py-1 rounded-lg border font-bold text-[11px] flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isRoleOverviewExpanded
+                    ? 'bg-slate-900 text-white border-slate-900'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+                title="Expandir ou recolher o painel resumo do perfil e carga da equipe"
+              >
+                <Users className="w-3.5 h-3.5 text-indigo-500" />
+                <span>
+                  Radar {activeRoleView === 'ADMINISTRADOR' ? 'Admin' : activeRoleView === 'COORDENADOR' ? 'Coordenador' : 'Analista'}
                 </span>
-                <span className="font-mono font-bold text-slate-900">
+                <span className="text-[10px] opacity-75">{isRoleOverviewExpanded ? '▲' : '▼'}</span>
+              </button>
+
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">
+                <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                <span className="text-slate-600 hidden sm:inline">
+                  {activeRoleView === 'ANALISTA' ? `@${currentUser}:` : 'Equipe:'}
+                </span>
+                <span className="font-mono font-bold text-slate-900 tabular-nums">
                   {formatDuration(
                     activeRoleView === 'ANALISTA' ? myPersonalMetrics.secondsSpent : kpis.totalTeamSeconds
                   )}
                 </span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-purple-50 border border-purple-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('LISTA');
+                  if (activeRoleView === 'ANALISTA') {
+                    setQuickFilter('DEPENDENCIA_COMIGO');
+                  } else {
+                    setStatusFilter('AGUARDANDO_DEPENDENCIA');
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer"
+                title="Filtrar tarefas aguardando dependência (@)"
+              >
                 <ArrowRightLeft className="w-3.5 h-3.5 text-purple-600" />
-                <span className="text-purple-800">
-                  {activeRoleView === 'ANALISTA' ? `Comigo (@${currentUser}):` : 'Dependências (@):'}
-                </span>
-                <span className="font-bold text-purple-900">
+                <span className="text-purple-800 hidden sm:inline">Dep. (@):</span>
+                <span className="font-bold text-purple-900 tabular-nums">
                   {activeRoleView === 'ANALISTA' ? kpis.dependenciaComigo : kpis.aguardandoDep}
                 </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200">
+              </button>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-emerald-800">Entrega:</span>
-                <span className="font-bold text-emerald-900">
+                <span className="font-bold text-emerald-900 tabular-nums">
                   {activeRoleView === 'ANALISTA'
                     ? `${myPersonalMetrics.concluidas}/${myPersonalMetrics.totalAssigned} (${
                         myPersonalMetrics.totalAssigned > 0
@@ -5328,171 +5433,101 @@ export default function App() {
             </div>
           </div>
 
-          <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-5 space-y-5">
+          <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-4 space-y-4">
         {/* ========================================================
-            BANNER DE ALERTA VISUAL: TAREFAS COM PRAZO DE 24 HORAS / ATRASADAS
+            BARRA COMPACTA E DINÂMICA DE ALERTA 24 HORAS / VENCIMENTO
         ======================================================== */}
         {reminders24hData.totalCount > 0 && !isReminderBannerDismissed && (
           <div
-            className={`transition-all duration-300 rounded-2xl border ${
+            className={`transition-all duration-200 rounded-xl border ${
               reminders24hData.overdueCount > 0
-                ? 'bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 border-rose-500/80 shadow-rose-950/30'
-                : 'bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 border-amber-500/80 shadow-amber-950/30'
-            } text-white shadow-lg p-4 sm:p-5 relative overflow-hidden`}
+                ? 'bg-gradient-to-r from-rose-950 via-slate-900 to-slate-900 border-rose-500/70'
+                : 'bg-gradient-to-r from-amber-950 via-slate-900 to-slate-900 border-amber-500/70'
+            } text-white shadow-sm px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2.5`}
           >
-            {/* Ambient glow accent */}
-            <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider shrink-0 ${
+                  reminders24hData.overdueCount > 0
+                    ? 'bg-rose-500 text-white'
+                    : 'bg-amber-400 text-slate-950'
+                }`}
+              >
+                <AlarmClock className="w-3.5 h-3.5 animate-pulse" />
+                <span>
+                  {reminders24hData.overdueCount > 0
+                    ? `${reminders24hData.overdueCount} Vencida(s) + ${reminders24hData.expiring24hCount} em 24h`
+                    : `${reminders24hData.totalCount} Prazo(s) em 24h`}
+                </span>
+              </span>
 
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3.5">
-                <div
-                  className={`p-3 rounded-xl flex items-center justify-center shrink-0 ${
-                    reminders24hData.overdueCount > 0
-                      ? 'bg-rose-500/20 text-rose-300 ring-1 ring-rose-400/50 animate-pulse'
-                      : 'bg-amber-500/20 text-amber-300 ring-1 ring-amber-400/50'
-                  }`}
-                >
-                  <AlarmClock className="w-6 h-6 animate-bounce" />
-                </div>
+              {reminders24hData.myCount > 0 && (
+                <span className="px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-200 border border-amber-400/40 text-[11px] font-bold shrink-0">
+                  {reminders24hData.myCount} com @{currentUser}
+                </span>
+              )}
 
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
+              {/* Chips clicáveis das tarefas urgentes */}
+              <div className="hidden xl:flex items-center gap-1.5 overflow-x-auto">
+                {reminders24hData.urgentItems.slice(0, 3).map((item) => (
+                  <button
+                    key={item.task.id}
+                    type="button"
+                    onClick={() => setSelectedTaskId(item.task.id)}
+                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 transition-all cursor-pointer shrink-0"
+                  >
+                    <span className="font-mono text-amber-300">{item.task.code}</span>
+                    <span className="truncate max-w-[130px] text-slate-100">{item.task.title}</span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider ${
-                        reminders24hData.overdueCount > 0
-                          ? 'bg-rose-500 text-white'
-                          : 'bg-amber-500 text-slate-950'
+                      className={`px-1.5 py-0.2 rounded text-[10px] font-black ${
+                        item.isOverdue ? 'bg-rose-900 text-rose-200' : 'bg-amber-900 text-amber-200'
                       }`}
                     >
-                      {reminders24hData.overdueCount > 0
-                        ? '🚨 Alerta Crítico de Vencimento'
-                        : '⏰ Lembrete de Prazo 24 Horas'}
+                      {item.countdownLabel}
                     </span>
-                    <span className="text-xs text-slate-300">
-                      Data Base:{' '}
-                      <strong className="font-mono text-white">
-                        {analysisRefDate.split('-').reverse().join('/')}
-                      </strong>
-                    </span>
-                    {reminders24hData.myCount > 0 && (
-                      <span className="px-2 py-0.5 rounded bg-amber-400/20 text-amber-200 border border-amber-400/40 text-[11px] font-bold">
-                        👉 {reminders24hData.myCount} com você (@{currentUser})
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-sm sm:text-base font-extrabold text-white flex flex-wrap items-center gap-2">
-                    <span>
-                      {reminders24hData.urgentItems.length} tarefa(s) requerem atenção imediata nas próximas 24h
-                    </span>
-                    <span className="text-xs font-normal text-slate-400">
-                      ({reminders24hData.expiring24hCount} vencendo hoje/24h • {reminders24hData.overdueCount} vencidas)
-                    </span>
-                  </h3>
-
-                  {/* Atalhos rápidos das tarefas mais urgentes */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    {reminders24hData.urgentItems.slice(0, 3).map((item) => (
-                      <button
-                        key={item.task.id}
-                        type="button"
-                        onClick={() => setSelectedTaskId(item.task.id)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition-all cursor-pointer"
-                      >
-                        <span className="font-mono text-amber-300">{item.task.code}</span>
-                        <span className="text-slate-500">|</span>
-                        <span className="truncate max-w-[140px] text-slate-100">{item.task.title}</span>
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
-                            item.isOverdue
-                              ? 'bg-rose-950 text-rose-300 border border-rose-700'
-                              : 'bg-amber-950 text-amber-300 border border-amber-700'
-                          }`}
-                        >
-                          {item.countdownLabel}
-                        </span>
-                      </button>
-                    ))}
-                    {reminders24hData.urgentItems.length > 3 && (
-                      <span className="text-xs text-slate-400 font-medium">
-                        +{reminders24hData.urgentItems.length - 3} outra(s)...
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Botões de Ação no Banner */}
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsReminderModalOpen(true)}
-                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-                >
-                  <BellRing className="w-4 h-4" />
-                  <span>Central de Lembretes ({reminders24hData.totalCount})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('ANALISE_SLA');
-                    setAnalysisSlaFilter('HOJE');
-                  }}
-                  className="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition-all cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-amber-400" />
-                  <span>Ver no Painel SLA</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsReminderBannerDismissed(true)}
-                  className="p-2 rounded-xl bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
-                  title="Minimizar banner temporariamente"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Barra minimizada caso o usuário feche o banner principal */}
-        {reminders24hData.totalCount > 0 && isReminderBannerDismissed && (
-          <div className="flex items-center justify-between px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-400/40 text-amber-900 text-xs">
-            <div className="flex items-center gap-2">
-              <AlarmClock className="w-4 h-4 text-amber-700 animate-pulse" />
-              <span>
-                <strong>{reminders24hData.totalCount} lembrete(s) ativo(s)</strong> nas próximas 24 horas.
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsReminderModalOpen(true)}
-                className="font-bold underline text-amber-900 hover:text-amber-950 cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer"
               >
-                Abrir Central
+                <BellRing className="w-3.5 h-3.5" />
+                <span>Central 24h ({reminders24hData.totalCount})</span>
               </button>
               <button
                 type="button"
-                onClick={() => setIsReminderBannerDismissed(false)}
-                className="px-2 py-0.5 rounded bg-amber-200/80 hover:bg-amber-300 font-bold text-[11px] text-amber-950 cursor-pointer"
+                onClick={() => {
+                  setActiveTab('ANALISE_SLA');
+                  setAnalysisSlaFilter('VENCE_HOJE');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all cursor-pointer hidden sm:inline-flex items-center gap-1"
               >
-                Expandir Banner
+                <span>Painel SLA</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsReminderBannerDismissed(true)}
+                className="p-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-white transition-all cursor-pointer"
+                title="Ocultar barra de alerta"
+              >
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         )}
 
         {/* ==========================================
-            PORTAL CONTEXTUAL SEGREGADO:
+            PORTAL CONTEXTUAL SEGREGADO (EXPANSÍVEL PELO BOTÃO "RADAR" NO SUB-HEADER):
             1) VISÃO ADMINISTRADOR
             2) VISÃO COORDENADOR
             3) VISÃO ANALISTA
         ========================================== */}
-        {activeRoleView === 'ADMINISTRADOR' && (
+        {isRoleOverviewExpanded && activeRoleView === 'ADMINISTRADOR' && (
           <div className="bg-white rounded-2xl border border-rose-200/90 shadow-xs overflow-hidden">
             <div className="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -5631,7 +5666,7 @@ export default function App() {
           </div>
         )}
 
-        {activeRoleView === 'COORDENADOR' && (
+        {isRoleOverviewExpanded && activeRoleView === 'COORDENADOR' && (
           <div className="bg-white rounded-2xl border border-amber-300/90 shadow-xs overflow-hidden">
             <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -5763,7 +5798,7 @@ export default function App() {
           </div>
         )}
 
-        {activeRoleView === 'ANALISTA' && (
+        {isRoleOverviewExpanded && activeRoleView === 'ANALISTA' && (
           <div className="bg-white rounded-2xl border border-emerald-300/90 shadow-xs overflow-hidden">
             <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -5887,94 +5922,96 @@ export default function App() {
           </div>
         )}
 
-        {/* CARDS DE STATUS RÁPIDOS GLOBAIS */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* CARDS DE STATUS RÁPIDOS GLOBAIS (Exibidos nas Visões Operacionais de Tarefas) */}
+        {(['LISTA', 'MATRIZ', 'KANBAN', 'AVULSAS'].includes(activeTab)) && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
           <div
             onClick={() => { setStatusFilter('TODOS'); setQuickFilter('TODAS'); }}
-            className={`p-3.5 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md ${statusFilter === 'TODOS' && quickFilter === 'TODAS' ? 'ring-2 ring-slate-900 border-slate-900' : 'border-slate-200'}`}
+            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'TODOS' && quickFilter === 'TODAS' ? 'ring-2 ring-slate-900 border-slate-900' : 'border-slate-200'}`}
           >
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
               <span>TOTAL OBRIGAÇÕES</span>
-              <Layers className="w-4 h-4 text-slate-400" />
+              <Layers className="w-3.5 h-3.5 text-slate-400" />
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-slate-900">{kpis.total}</span>
-              <span className="text-[11px] text-slate-500">{kpis.fechamentoCount} Fech. + {kpis.avulsasCount} Avulsas</span>
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <span className="text-xl font-extrabold text-slate-900 tabular-nums">{kpis.total}</span>
+              <span className="text-[10px] text-slate-500">{kpis.fechamentoCount} Fech. + {kpis.avulsasCount} Avul.</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('EM_ANDAMENTO'); setQuickFilter('TODAS'); }}
-            className={`p-3.5 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md ${statusFilter === 'EM_ANDAMENTO' ? 'ring-2 ring-blue-600 border-blue-600' : 'border-blue-200'}`}
+            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'EM_ANDAMENTO' ? 'ring-2 ring-blue-600 border-blue-600' : 'border-blue-200'}`}
           >
-            <div className="flex items-center justify-between text-xs font-semibold text-blue-700">
+            <div className="flex items-center justify-between text-[11px] font-bold text-blue-700">
               <span>INICIADAS / ATIVAS</span>
-              <Play className="w-4 h-4 text-blue-600 fill-blue-600" />
+              <Play className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-blue-700">{kpis.emAndamento}</span>
-              <span className="text-[11px] font-semibold text-blue-600 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" /> Cronômetro ON
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <span className="text-xl font-extrabold text-blue-700 tabular-nums">{kpis.emAndamento}</span>
+              <span className="text-[10px] font-semibold text-blue-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" /> Timer ON
               </span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('PAUSADA'); setQuickFilter('TODAS'); }}
-            className={`p-3.5 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md ${statusFilter === 'PAUSADA' ? 'ring-2 ring-amber-500 border-amber-500' : 'border-amber-200'}`}
+            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'PAUSADA' ? 'ring-2 ring-amber-500 border-amber-500' : 'border-amber-200'}`}
           >
-            <div className="flex items-center justify-between text-xs font-semibold text-amber-800">
+            <div className="flex items-center justify-between text-[11px] font-bold text-amber-800">
               <span>PAUSADAS</span>
-              <Pause className="w-4 h-4 text-amber-600" />
+              <Pause className="w-3.5 h-3.5 text-amber-600" />
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-amber-700">{kpis.pausadas}</span>
-              <span className="text-[11px] text-amber-700">Tempo salvo</span>
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <span className="text-xl font-extrabold text-amber-700 tabular-nums">{kpis.pausadas}</span>
+              <span className="text-[10px] text-amber-700">Tempo salvo</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('AGUARDANDO_DEPENDENCIA'); setQuickFilter('TODAS'); }}
-            className={`p-3.5 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md ${statusFilter === 'AGUARDANDO_DEPENDENCIA' ? 'ring-2 ring-purple-600 border-purple-600' : 'border-purple-200'}`}
+            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'AGUARDANDO_DEPENDENCIA' ? 'ring-2 ring-purple-600 border-purple-600' : 'border-purple-200'}`}
           >
-            <div className="flex items-center justify-between text-xs font-semibold text-purple-800">
+            <div className="flex items-center justify-between text-[11px] font-bold text-purple-800">
               <span>DEPENDÊNCIA (@)</span>
-              <ArrowRightLeft className="w-4 h-4 text-purple-600" />
+              <ArrowRightLeft className="w-3.5 h-3.5 text-purple-600" />
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-purple-700">{kpis.aguardandoDep}</span>
-              <span className="text-[11px] font-bold text-purple-700">{kpis.dependenciaComigo} p/ @{currentUser}</span>
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <span className="text-xl font-extrabold text-purple-700 tabular-nums">{kpis.aguardandoDep}</span>
+              <span className="text-[10px] font-bold text-purple-700">{kpis.dependenciaComigo} p/ @{currentUser}</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('PENDENTE'); setQuickFilter('TODAS'); }}
-            className={`p-3.5 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md ${statusFilter === 'PENDENTE' ? 'ring-2 ring-slate-500 border-slate-500' : 'border-slate-200'}`}
+            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'PENDENTE' ? 'ring-2 ring-slate-500 border-slate-500' : 'border-slate-200'}`}
           >
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
               <span>NÃO INICIADAS</span>
-              <Clock className="w-4 h-4 text-slate-400" />
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-slate-700">{kpis.pendentes}</span>
-              <span className="text-[11px] text-slate-500">Na fila</span>
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <span className="text-xl font-extrabold text-slate-700 tabular-nums">{kpis.pendentes}</span>
+              <span className="text-[10px] text-slate-500">Na fila</span>
             </div>
           </div>
 
           <div
             onClick={() => { setStatusFilter('CONCLUIDA'); setQuickFilter('TODAS'); }}
-            className={`p-3.5 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-md ${statusFilter === 'CONCLUIDA' ? 'ring-2 ring-emerald-600 border-emerald-600' : 'border-emerald-200'}`}
+            className={`p-3 rounded-xl border transition-all cursor-pointer bg-white hover:shadow-sm ${statusFilter === 'CONCLUIDA' ? 'ring-2 ring-emerald-600 border-emerald-600' : 'border-emerald-200'}`}
           >
-            <div className="flex items-center justify-between text-xs font-semibold text-emerald-800">
+            <div className="flex items-center justify-between text-[11px] font-bold text-emerald-800">
               <span>CONCLUÍDAS</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             </div>
-            <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold text-emerald-700">{kpis.concluidas}</span>
-              <span className="text-[11px] font-bold text-emerald-700">{kpis.percentConcluido}% entregue</span>
+            <div className="mt-1.5 flex items-baseline justify-between">
+              <span className="text-xl font-extrabold text-emerald-700 tabular-nums">{kpis.concluidas}</span>
+              <span className="text-[10px] font-bold text-emerald-700">{kpis.percentConcluido}% entregue</span>
             </div>
           </div>
         </div>
+        )}
 
         {/* ==========================================
             ABA: CADASTRO DE TAREFAS PADRÃO (CATÁLOGO DE FECHAMENTO RECORRENTE)
@@ -7340,26 +7377,47 @@ export default function App() {
         )}
 
         {/* ==========================================
-            BARRA DE FILTROS & BUSCA (PARA LISTA, MATRIZ, KANBAN, AVULSAS)
+            BARRA DE FILTROS & BUSCA DINÂMICA (PARA LISTA, MATRIZ, KANBAN, AVULSAS)
         ========================================== */}
         {(activeTab === 'LISTA' || activeTab === 'MATRIZ' || activeTab === 'KANBAN' || activeTab === 'AVULSAS') && (
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-1.5">
+          <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2.5">
+            {/* Linha 1: Busca Rápida + Pílulas de Filtro Rápido + Alternador Cards/Tabela + Botão Filtros Avançados */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-[280px]">
+                <div className="relative w-full sm:w-64 lg:w-72 shrink-0">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar código, tarefa, grupo..."
+                    className="w-full pl-8 pr-7 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
                 {[
-                  { id: 'TODAS', label: 'Todas as Tarefas' },
-                  { id: 'MINHAS', label: `Minhas Tarefas (@${currentUser})` },
-                  { id: 'DEPENDENCIA_COMIGO', label: `Transferidas p/ Mim (@${currentUser})`, count: kpis.dependenciaComigo, purple: true },
-                  { id: 'EM_EXECUCAO', label: 'Em Execução Agora (Timer ON)' },
-                  { id: 'FECHAMENTO', label: 'Rotina Padronizada (Fechamento)' },
-                  { id: 'AVULSAS', label: 'Tarefas Avulsas / Esporádicas' }
+                  { id: 'TODAS', label: 'Todas' },
+                  { id: 'MINHAS', label: `Minhas (@${currentUser})` },
+                  { id: 'DEPENDENCIA_COMIGO', label: `Comigo (@)`, count: kpis.dependenciaComigo, purple: true },
+                  { id: 'EM_EXECUCAO', label: 'Timer ON' },
+                  { id: 'FECHAMENTO', label: 'Fechamento' },
+                  { id: 'AVULSAS', label: 'Avulsas' }
                 ].map((pill) => {
                   const active = quickFilter === pill.id;
                   return (
                     <button
                       key={pill.id}
                       onClick={() => setQuickFilter(pill.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                         active
                           ? pill.purple ? 'bg-purple-700 text-white shadow-xs' : 'bg-slate-900 text-white shadow-xs'
                           : pill.purple ? 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -7376,8 +7434,84 @@ export default function App() {
                 })}
               </div>
 
-              {/* Botão Limpar Filtros */}
-              <div className="flex items-center gap-3">
+              {/* Controles de Densidade (Cards vs Tabela), Expansão em Lote e Filtros Avançados */}
+              <div className="flex flex-wrap items-center gap-2">
+                {(activeTab === 'LISTA' || activeTab === 'AVULSAS') && (
+                  <>
+                    <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => setTaskListDensity('CARDS')}
+                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          taskListDensity === 'CARDS'
+                            ? 'bg-white text-slate-900 shadow-2xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="Exibir obrigações em Cards detalhados"
+                      >
+                        <ListTodo className="w-3.5 h-3.5" />
+                        <span>Cards</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTaskListDensity('TABELA')}
+                        className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          taskListDensity === 'TABELA'
+                            ? 'bg-white text-slate-900 shadow-2xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="Exibir obrigações em Tabela Rápida compacta"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Tabela</span>
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const anyExpanded = filteredTasks.some((t) => expandedTaskBranches[t.id]);
+                        if (anyExpanded) {
+                          setExpandedTaskBranches({});
+                        } else {
+                          const next: Record<string, boolean> = {};
+                          filteredTasks.forEach((t) => {
+                            next[t.id] = true;
+                          });
+                          setExpandedTaskBranches(next);
+                        }
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer hidden xl:inline-flex items-center gap-1"
+                      title="Expandir ou recolher a grade de 40 filiais em todas as tarefas visíveis"
+                    >
+                      <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>
+                        {filteredTasks.some((t) => expandedTaskBranches[t.id]) ? 'Recolher Filiais ▲' : 'Expandir Filiais ▼'}
+                      </span>
+                    </button>
+                  </>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setIsAdvancedFiltersOpen((prev) => !prev)}
+                  className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isAdvancedFiltersOpen ||
+                    departmentFilter !== 'TODOS' ||
+                    topicFilter !== 'TODOS' ||
+                    subGroupFilter !== 'TODOS' ||
+                    recurrenceFilter !== 'TODOS' ||
+                    userFilter !== 'TODOS' ||
+                    statusFilter !== 'TODOS'
+                      ? 'bg-indigo-50 text-indigo-900 border-indigo-300'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                  }`}
+                >
+                  <Filter className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Filtros</span>
+                  <span className="text-[10px]">{isAdvancedFiltersOpen ? '▲' : '▼'}</span>
+                </button>
+
                 {(quickFilter !== 'TODAS' ||
                   userFilter !== 'TODOS' ||
                   statusFilter !== 'TODOS' ||
@@ -7401,129 +7535,114 @@ export default function App() {
                       setActiveOperatorFilter('TODOS');
                       setSearchQuery('');
                     }}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
-                    title="Limpar todos os filtros e mostrar todas as tarefas"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
+                    title="Limpar todos os filtros"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Limpar Filtros</span>
+                    <span>Limpar</span>
                   </button>
                 )}
 
-                <span className="text-xs font-medium text-slate-500">
-                  Exibindo <strong>{filteredTasks.length}</strong> de {tasks.length} obrigações
+                <span className="text-xs font-semibold text-slate-500 tabular-nums">
+                  <strong>{filteredTasks.length}</strong>/{tasks.length}
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-2.5 pt-2 border-t border-slate-100">
-              <div className="sm:col-span-2 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar por código (CTB-01, FIS-01), grupo, sub-grupo, descrição, competência..."
-                  className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white"
-                />
+            {/* Painel Expansível de Filtros Avançados (Depto, Grupo, Sub-Grupo, Recorrência, Resp, Status) */}
+            {(isAdvancedFiltersOpen ||
+              departmentFilter !== 'TODOS' ||
+              topicFilter !== 'TODOS' ||
+              subGroupFilter !== 'TODOS' ||
+              recurrenceFilter !== 'TODOS' ||
+              userFilter !== 'TODOS' ||
+              statusFilter !== 'TODOS') && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 pt-2 border-t border-slate-100">
+                <select
+                  value={departmentFilter}
+                  onChange={(e) => setDepartmentFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="TODOS">🏢 Todos os Deptos</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>
+                      Depto: {d}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={topicFilter}
+                  onChange={(e) => setTopicFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="TODOS">📂 Todos os Grupos</option>
+                  {GROUPS_OPTIONS.map((g) => (
+                    <option key={g} value={g}>
+                      Grupo: {g}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={subGroupFilter}
+                  onChange={(e) => setSubGroupFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="TODOS">📑 Todos os Sub-Grupos</option>
+                  {SUBGROUPS_OPTIONS.map((sg) => (
+                    <option key={sg} value={sg}>
+                      Sub-Grupo: {sg}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={recurrenceFilter}
+                  onChange={(e) => setRecurrenceFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="TODOS">↻ Todas Recorrências</option>
+                  <option value="ESPORADICA">Recorrência: Esporádica</option>
+                  <option value="MENSAL">Recorrência: Mensal</option>
+                  <option value="TRIMESTRAL">Recorrência: Trimestral</option>
+                  <option value="ANUAL">Recorrência: Anual</option>
+                </select>
+
+                <select
+                  value={userFilter}
+                  onChange={(e) => setUserFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="TODOS">👤 Todos Responsáveis</option>
+                  {TEAM_MEMBERS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      Resp: @{m.name}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                >
+                  <option value="TODOS">📌 Todos Status</option>
+                  <option value="PENDENTE">Pendente</option>
+                  <option value="EM_ANDAMENTO">Em Andamento</option>
+                  <option value="PAUSADA">Pausada</option>
+                  <option value="AGUARDANDO_DEPENDENCIA">Dependência (@)</option>
+                  <option value="CONCLUIDA">Concluída</option>
+                </select>
               </div>
+            )}
 
-              <select
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
-              >
-                <option value="TODOS">🏢 Todos os Deptos</option>
-                {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>
-                    Depto: {d}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={topicFilter}
-                onChange={(e) => setTopicFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
-              >
-                <option value="TODOS">📂 Todos os Grupos</option>
-                {GROUPS_OPTIONS.map((g) => (
-                  <option key={g} value={g}>
-                    Grupo: {g}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={subGroupFilter}
-                onChange={(e) => setSubGroupFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
-              >
-                <option value="TODOS">📑 Todos os Sub-Grupos</option>
-                {SUBGROUPS_OPTIONS.map((sg) => (
-                  <option key={sg} value={sg}>
-                    Sub-Grupo: {sg}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={recurrenceFilter}
-                onChange={(e) => setRecurrenceFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
-              >
-                <option value="TODOS">↻ Todas Recorrências</option>
-                <option value="ESPORADICA">Recorrência: Esporádica</option>
-                <option value="MENSAL">Recorrência: Mensal</option>
-                <option value="TRIMESTRAL">Recorrência: Trimestral</option>
-                <option value="ANUAL">Recorrência: Anual</option>
-              </select>
-
-              <select
-                value={competenceFilter}
-                onChange={(e) => setCompetenceFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-indigo-50 border border-indigo-200 rounded-lg font-extrabold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              >
-                <option value="TODOS">📅 Todas Competências</option>
-                {availableCompetences.map((comp) => (
-                  <option key={comp} value={comp}>
-                    Comp: {comp}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={userFilter}
-                onChange={(e) => setUserFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
-              >
-                <option value="TODOS">👤 Todos Responsáveis</option>
-                {TEAM_MEMBERS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    Resp: @{m.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-2.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
-              >
-                <option value="TODOS">📌 Todos Status</option>
-                <option value="PENDENTE">Pendente</option>
-                <option value="EM_ANDAMENTO">Em Andamento</option>
-                <option value="PAUSADA">Pausada</option>
-                <option value="AGUARDANDO_DEPENDENCIA">Dependência (@)</option>
-                <option value="CONCLUIDA">Concluída</option>
-              </select>
-            </div>
-
-            {/* Barra de Seleção Rápida de Competência (Mês) + Geração Automática */}
+            {/* Linha 2: Seleção Rápida de Competência (Mês) + Geração Automática */}
             <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1 mr-1">
                   <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-                  Mês / Competência Ativa:
+                  Competência:
                 </span>
                 <button
                   onClick={() => setCompetenceFilter('TODOS')}
@@ -7559,7 +7678,7 @@ export default function App() {
 
               <button
                 onClick={() => openAutoGenerateModal('11', '2026')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-extrabold transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-extrabold transition-all cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Gerar Tarefas Recorrentes p/ Mês...</span>
@@ -7567,7 +7686,7 @@ export default function App() {
             </div>
 
             {autoGenFeedback && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-950">
+              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-950">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>
@@ -7587,7 +7706,7 @@ export default function App() {
         )}
 
         {/* ==========================================
-            ABA 1 E 3: LISTA DE TAREFAS (COM ACORDEÃO NA MESMA TELA)
+            ABA 1 E 3: BANCADA DE TAREFAS (COM ALTERNADOR CARDS DINÂMICOS vs TABELA RÁPIDA + ACORDEÃO 40 FILIAIS)
         ========================================== */}
         {(activeTab === 'LISTA' || activeTab === 'AVULSAS') && (
           <div className="space-y-3">
@@ -7639,7 +7758,298 @@ export default function App() {
                   Limpar todos os filtros
                 </button>
               </div>
+            ) : taskListDensity === 'TABELA' ? (
+              /* ==============================================================
+                 MODO 1: VISÃO EM TABELA RÁPIDA (ALTA DENSIDADE + AÇÕES INLINE)
+              ============================================================== */
+              <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[72vh]">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead className="bg-slate-900 text-white sticky top-0 z-20">
+                      <tr>
+                        <th className="p-2.5 border-r border-slate-800 w-[90px]">Código</th>
+                        <th className="p-2.5 border-r border-slate-800 min-w-[260px]">Obrigação / Tarefa</th>
+                        <th className="p-2.5 border-r border-slate-800 min-w-[150px]">Depto / Grupo</th>
+                        <th className="p-2.5 border-r border-slate-800 text-center w-[110px]">Vencimento</th>
+                        <th className="p-2.5 border-r border-slate-800 w-[135px]">Responsável</th>
+                        <th className="p-2.5 border-r border-slate-800 text-center w-[140px]">Status</th>
+                        <th className="p-2.5 border-r border-slate-800 text-center w-[150px]">40 Filiais (Acordeão)</th>
+                        <th className="p-2.5 border-r border-slate-800 text-center w-[110px]">Cronômetro</th>
+                        <th className="p-2.5 text-center min-w-[215px] bg-slate-800">Ações Rápidas</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {filteredTasks.map((task) => {
+                        const st = STATUS_CONFIG[task.status] || STATUS_CONFIG.PENDENTE;
+                        const liveSeconds = getLiveTaskSeconds(
+                          task,
+                          companyScopeMode === 'SINGLE' ? selectedSingleCompany : null
+                        );
+                        const allBranchStats = calculateBranchStats(task.branches, BRANCH_CODES);
+                        const member = TEAM_MEMBERS.find((m) => m.id === task.assignee) || TEAM_MEMBERS[0];
+                        const isRunning = task.status === 'EM_ANDAMENTO';
+                        const isDone = task.status === 'CONCLUIDA';
+                        const isGridExpanded = !!expandedTaskBranches[task.id];
+                        const localScope = taskActionScope[task.id] || {
+                          mode: companyScopeMode === 'SINGLE' ? 'SELECTED' : 'ALL',
+                          branches: companyScopeMode === 'SINGLE' ? [selectedSingleCompany] : []
+                        };
+                        const targetBranchesForAction = getTaskTargetBranches(task);
+
+                        return (
+                          <React.Fragment key={task.id}>
+                            <tr
+                              className={`transition-colors ${
+                                isRunning
+                                  ? 'bg-blue-50/40 hover:bg-blue-50/70'
+                                  : 'hover:bg-slate-50/90'
+                              }`}
+                            >
+                              <td className="p-2.5 border-r border-slate-200 font-mono font-bold">
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-[11px] ${
+                                      task.category === 'AVULSA'
+                                        ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                        : 'bg-slate-900 text-white'
+                                    }`}
+                                  >
+                                    {task.code}
+                                  </span>
+                                  {task.isCritical && (
+                                    <span title="Caminho Crítico">
+                                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedTaskId(task.id)}
+                                  className="text-left font-bold text-slate-900 hover:text-indigo-600 transition-colors cursor-pointer block leading-snug"
+                                >
+                                  {task.title}
+                                </button>
+                                {reminders24hData.remindersMap[task.id] && (
+                                  <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.2 rounded text-[10px] font-black bg-amber-100 text-amber-950 border border-amber-300">
+                                    <AlarmClock className="w-3 h-3 text-amber-700" />
+                                    {reminders24hData.remindersMap[task.id].countdownLabel}
+                                  </span>
+                                )}
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200">
+                                <span
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold ${
+                                    task.department === 'Fiscal'
+                                      ? 'bg-teal-100 text-teal-900'
+                                      : 'bg-indigo-100 text-indigo-900'
+                                  }`}
+                                >
+                                  {task.department || 'Contábil'}
+                                </span>
+                                <div className="text-[11px] font-semibold text-slate-700 truncate max-w-[160px] mt-0.5">
+                                  {task.group || task.topic}
+                                </div>
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200 text-center font-mono">
+                                <div className="font-bold text-slate-900">
+                                  {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
+                                </div>
+                                <div className="text-[10px] text-slate-500">Comp: {task.competence || '10/2026'}</div>
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className={`w-6 h-6 rounded-full ${member.color} text-white text-[10px] font-bold flex items-center justify-center shrink-0`}
+                                  >
+                                    {member.avatar}
+                                  </span>
+                                  <span className="font-bold text-slate-800">@{task.assignee}</span>
+                                </div>
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200 text-center">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border ${st.bg} ${st.text} ${st.border}`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
+                                  {st.label}
+                                </span>
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedTaskBranches((prev) => ({
+                                      ...prev,
+                                      [task.id]: !prev[task.id]
+                                    }))
+                                  }
+                                  className={`w-full px-2 py-1 rounded-lg border text-left transition-all cursor-pointer ${
+                                    isGridExpanded
+                                      ? 'bg-slate-900 text-white border-slate-900'
+                                      : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between text-[10px] font-bold mb-0.5 tabular-nums">
+                                    <span>{allBranchStats.ok + allBranchStats.na}/40</span>
+                                    <span>{allBranchStats.percent}% {isGridExpanded ? '▲' : '▼'}</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-slate-200/70 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-emerald-500"
+                                      style={{ width: `${allBranchStats.percent}%` }}
+                                    />
+                                  </div>
+                                </button>
+                              </td>
+
+                              <td className="p-2.5 border-r border-slate-200 text-center font-mono font-extrabold tabular-nums">
+                                <span className={isRunning ? 'text-blue-700 animate-pulse' : 'text-slate-900'}>
+                                  {formatDuration(liveSeconds)}
+                                </span>
+                              </td>
+
+                              <td className="p-2 text-center bg-slate-50/50">
+                                <div className="flex items-center justify-center gap-1">
+                                  {!isRunning ? (
+                                    <button
+                                      onClick={() => handleStartTask(task)}
+                                      className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                                      title="Iniciar Cronômetro"
+                                    >
+                                      <Play className="w-3 h-3 fill-white" />
+                                      <span>Iniciar</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => openPauseModal(task)}
+                                      className="px-2 py-1 rounded bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                                      title="Pausar Cronômetro"
+                                    >
+                                      <Pause className="w-3 h-3 fill-white" />
+                                      <span>Pausar</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => openTransferModal(task)}
+                                    className="px-2 py-1 rounded bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 text-[11px] font-bold cursor-pointer"
+                                    title="Transferir (@)"
+                                  >
+                                    @
+                                  </button>
+                                  {!isDone ? (
+                                    <button
+                                      onClick={() => handleCompleteTask(task)}
+                                      className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer"
+                                      title="Concluir Obrigação"
+                                    >
+                                      ✓
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleReopenTask(task)}
+                                      className="px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-bold cursor-pointer"
+                                      title="Reabrir"
+                                    >
+                                      ↺
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => setSelectedTaskId(task.id)}
+                                    className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold cursor-pointer"
+                                  >
+                                    Abrir
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+
+                            {isGridExpanded && (
+                              <tr className="bg-slate-50 border-b border-slate-200">
+                                <td colSpan={9} className="p-3.5 space-y-2.5">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-xs font-bold text-slate-700">
+                                        Filiais de [{task.code}] (Duplo clique alterna OK / P / N/A):
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setTaskScopeConfig(task.id, 'ALL', [])}
+                                        className="px-2 py-0.5 rounded bg-slate-900 text-white text-[11px] font-bold cursor-pointer"
+                                      >
+                                        Todas (40)
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setTaskScopeConfig(task.id, 'PENDING', [])}
+                                        className="px-2 py-0.5 rounded bg-amber-600 text-white text-[11px] font-bold cursor-pointer"
+                                      >
+                                        Pendentes ({allBranchStats.p})
+                                      </button>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCompleteTask(task, targetBranchesForAction)}
+                                        className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer"
+                                      >
+                                        ✓ Marcar Alvo OK ({targetBranchesForAction.length})
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSetBranchStatusDirect(task, targetBranchesForAction, 'p')}
+                                        className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 text-[11px] font-bold cursor-pointer"
+                                      >
+                                        Voltar Pendente
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1.5">
+                                    {BRANCH_CODES.map((bCode) => {
+                                      const detail = getBranchDetail(task, bCode);
+                                      const chipCfg = BRANCH_STATUS_CHIP[detail.status] || BRANCH_STATUS_CHIP.p;
+                                      const isSelectedIndividual =
+                                        localScope.mode === 'SELECTED' && localScope.branches?.includes(bCode);
+                                      return (
+                                        <div
+                                          key={bCode}
+                                          onClick={() => toggleBranchInTaskSelection(task, bCode)}
+                                          onDoubleClick={() => {
+                                            const nextSt =
+                                              detail.status === 'p' ? 'ok' : detail.status === 'ok' ? 'n/a' : 'p';
+                                            handleSetBranchStatusDirect(task, [bCode], nextSt);
+                                          }}
+                                          className={`px-2 py-1 rounded-lg border text-center transition-all cursor-pointer select-none ${chipCfg.cls} ${
+                                            isSelectedIndividual ? 'ring-2 ring-slate-950 scale-105' : ''
+                                          }`}
+                                        >
+                                          <div className="text-[10px] font-mono font-bold">{bCode}</div>
+                                          <div className="text-[9px] uppercase font-extrabold">{chipCfg.short}</div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             ) : (
+              /* ==============================================================
+                 MODO 2: VISÃO EM CARDS DINÂMICOS (HIERARQUIA VISUAL LIMPA)
+              ============================================================== */
               <div className="space-y-2.5">
                 {filteredTasks.map((task) => {
                   const st = STATUS_CONFIG[task.status] || STATUS_CONFIG.PENDENTE;
@@ -7671,14 +8081,16 @@ export default function App() {
                   return (
                     <div
                       key={task.id}
-                      className={`bg-white rounded-xl border transition-all hover:shadow-md ${
+                      className={`bg-white rounded-xl border border-l-4 transition-all hover:shadow-md ${
                         isRunning
-                          ? 'border-blue-400 ring-1 ring-blue-400/50 bg-blue-50/5'
+                          ? 'border-blue-300 border-l-blue-600 ring-1 ring-blue-400/40 bg-blue-50/5'
                           : isDep
-                          ? 'border-purple-300 bg-purple-50/5'
+                          ? 'border-purple-300 border-l-purple-600 bg-purple-50/5'
                           : isPaused
-                          ? 'border-amber-300'
-                          : 'border-slate-200'
+                          ? 'border-amber-300 border-l-amber-500'
+                          : isDone
+                          ? 'border-slate-200 border-l-emerald-500'
+                          : 'border-slate-200 border-l-slate-400'
                       }`}
                     >
                       <div className="p-4 space-y-3">
@@ -7703,23 +8115,23 @@ export default function App() {
                               </span>
 
                               <span className={`px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${deptBadgeCls}`}>
-                                Depto: {task.department || 'Contábil'}
+                                {task.department || 'Contábil'}
                               </span>
 
                               <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold">
-                                Grupo: {task.group || task.topic} ▸ Sub-Grupo: {task.subGroup || task.accountingType}
+                                {task.group || task.topic} ▸ {task.subGroup || task.accountingType}
                               </span>
 
                               <span className={`px-2 py-0.5 rounded-md border text-[10px] font-extrabold ${recCfg.badge}`}>
                                 ↻ {recCfg.label}
                               </span>
 
-                              <span className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 border border-sky-200 text-[11px] font-bold">
-                                Comp ({task.competenceType === 'ANUAL' ? 'Anual' : 'Mensal'}): {task.competence || '10/2026'}
+                              <span className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-900 border border-sky-200 text-[11px] font-bold font-mono">
+                                Comp: {task.competence || '10/2026'}
                               </span>
 
-                              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold">
-                                Vencimento: {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
+                              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold font-mono">
+                                Venc: {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
                               </span>
 
                               {reminders24hData.remindersMap[task.id] && (
@@ -7749,12 +8161,12 @@ export default function App() {
 
                               {task.isCritical && (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                  <AlertTriangle className="w-3 h-3" /> Caminho Crítico
+                                  <AlertTriangle className="w-3 h-3" /> Crítica
                                 </span>
                               )}
                             </div>
 
-                            {/* TÍTULO CLICÁVEL: Expande empresas na MESMA TELA (Acordeão) sem abrir nova janela */}
+                            {/* TÍTULO CLICÁVEL: Expande empresas na MESMA TELA (Acordeão) */}
                             <div className="flex items-start gap-2">
                               <button
                                 onClick={() =>
@@ -7766,8 +8178,8 @@ export default function App() {
                                 className="text-left text-sm sm:text-base font-bold text-slate-900 hover:text-blue-700 transition-colors cursor-pointer flex items-center gap-2"
                               >
                                 <span>{task.title}</span>
-                                <span className="text-xs font-normal text-blue-600 underline">
-                                  {isGridExpanded ? 'Ocultar empresas ▲' : 'Ver empresas ▼'}
+                                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                                  {isGridExpanded ? 'Ocultar 40 filiais ▲' : '40 filiais ▼'}
                                 </span>
                               </button>
                             </div>
@@ -7832,7 +8244,7 @@ export default function App() {
                                   : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                               }`}
                             >
-                              <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                              <div className="flex items-center justify-between text-[11px] font-bold mb-1 tabular-nums">
                                 <span className="flex items-center gap-1">
                                   <Building2 className="w-3.5 h-3.5 text-emerald-500" />
                                   {allBranchStats.ok + allBranchStats.na}/40 Emp.
@@ -7845,7 +8257,7 @@ export default function App() {
                                   style={{ width: `${allBranchStats.percent}%` }}
                                 />
                               </div>
-                              <div className="text-[10px] opacity-75 mt-0.5 flex items-center justify-between">
+                              <div className="text-[10px] opacity-75 mt-0.5 flex items-center justify-between tabular-nums">
                                 <span>{allBranchStats.ok} OK • {allBranchStats.p} P</span>
                                 <span className="underline font-semibold">
                                   {isGridExpanded ? 'Ocultar ▲' : 'Selecionar ▼'}
@@ -7863,7 +8275,7 @@ export default function App() {
                                 <Timer className="w-3 h-3" />
                                 <span>{isRunning ? 'Timer ON' : 'Tempo Gasto'}</span>
                               </div>
-                              <div className={`font-mono text-sm sm:text-base font-extrabold ${isRunning ? 'text-emerald-400' : 'text-slate-900'}`}>
+                              <div className={`font-mono text-sm sm:text-base font-extrabold tabular-nums ${isRunning ? 'text-emerald-400' : 'text-slate-900'}`}>
                                 {formatDuration(liveSeconds)}
                               </div>
                             </div>
@@ -8190,23 +8602,23 @@ export default function App() {
         )}
 
         {/* ==========================================
-            ABA 3: KANBAN
+            ABA 3: KANBAN DINÂMICO POR STATUS
         ========================================== */}
         {activeTab === 'KANBAN' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3.5 items-start">
             {[
-              { key: 'PENDENTE', title: 'Pendente', headerBg: 'bg-slate-800' },
-              { key: 'EM_ANDAMENTO', title: 'Em Andamento', headerBg: 'bg-blue-700' },
-              { key: 'PAUSADA', title: 'Pausada', headerBg: 'bg-amber-600' },
-              { key: 'AGUARDANDO_DEPENDENCIA', title: 'Dependência (@)', headerBg: 'bg-purple-700' },
-              { key: 'CONCLUIDA', title: 'Concluída', headerBg: 'bg-emerald-700' }
+              { key: 'PENDENTE', title: 'Pendente', headerBg: 'bg-slate-800', accentBorder: 'border-l-slate-400' },
+              { key: 'EM_ANDAMENTO', title: 'Em Andamento', headerBg: 'bg-blue-700', accentBorder: 'border-l-blue-600' },
+              { key: 'PAUSADA', title: 'Pausada', headerBg: 'bg-amber-600', accentBorder: 'border-l-amber-500' },
+              { key: 'AGUARDANDO_DEPENDENCIA', title: 'Dependência (@)', headerBg: 'bg-purple-700', accentBorder: 'border-l-purple-600' },
+              { key: 'CONCLUIDA', title: 'Concluída', headerBg: 'bg-emerald-700', accentBorder: 'border-l-emerald-500' }
             ].map((col) => {
               const colTasks = filteredTasks.filter((t) => t.status === col.key);
               return (
                 <div key={col.key} className="bg-slate-100/90 rounded-xl border border-slate-200 overflow-hidden flex flex-col max-h-[75vh]">
                   <div className={`${col.headerBg} text-white px-3.5 py-2.5 flex items-center justify-between`}>
                     <span className="text-xs font-bold uppercase tracking-wider">{col.title}</span>
-                    <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-black/25">{colTasks.length}</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-extrabold bg-black/25 tabular-nums">{colTasks.length}</span>
                   </div>
                   <div className="p-2.5 space-y-2.5 overflow-y-auto flex-1">
                     {colTasks.length === 0 ? (
@@ -8217,38 +8629,107 @@ export default function App() {
                       colTasks.map((task) => {
                         const liveSecs = getLiveTaskSeconds(task);
                         const branchStats = calculateBranchStats(task.branches);
+                        const member = TEAM_MEMBERS.find((m) => m.id === task.assignee) || TEAM_MEMBERS[0];
                         return (
-                          <div key={task.id} className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs hover:shadow-md transition-all space-y-2.5">
+                          <div
+                            key={task.id}
+                            className={`bg-white p-3 rounded-xl border border-slate-200 border-l-4 ${col.accentBorder} shadow-2xs hover:shadow-md transition-all space-y-2.5`}
+                          >
                             <div className="flex items-center justify-between gap-1">
-                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${task.category === 'AVULSA' ? 'bg-amber-100 text-amber-900' : 'bg-slate-900 text-white'}`}>{task.code}</span>
-                              <span className="font-mono text-xs font-bold text-slate-700 flex items-center gap-1">
+                              <div className="flex items-center gap-1">
+                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${task.category === 'AVULSA' ? 'bg-amber-100 text-amber-900' : 'bg-slate-900 text-white'}`}>
+                                  {task.code}
+                                </span>
+                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${task.department === 'Fiscal' ? 'bg-teal-100 text-teal-900' : 'bg-indigo-100 text-indigo-900'}`}>
+                                  {task.department || 'Contábil'}
+                                </span>
+                                {task.isCritical && <AlertTriangle className="w-3 h-3 text-rose-600" />}
+                              </div>
+                              <span className="font-mono text-xs font-bold text-slate-700 flex items-center gap-1 tabular-nums">
                                 <Clock className="w-3 h-3 text-blue-600" /> {formatDuration(liveSecs)}
                               </span>
                             </div>
-                            <button onClick={() => setSelectedTaskId(task.id)} className="text-left text-xs font-bold text-slate-900 hover:text-blue-700 line-clamp-2 cursor-pointer">
+
+                            <button
+                              onClick={() => setSelectedTaskId(task.id)}
+                              className="text-left text-xs font-bold text-slate-900 hover:text-indigo-600 line-clamp-2 cursor-pointer block leading-snug"
+                            >
                               {task.title}
                             </button>
-                            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                              <span className="font-bold text-slate-800">@{task.assignee}</span>
-                              <span>Filiais: {branchStats.percent}%</span>
+
+                            <div className="space-y-1 pt-1 border-t border-slate-100">
+                              <div className="flex items-center justify-between text-[11px] text-slate-500">
+                                <span className="flex items-center gap-1 font-bold text-slate-800">
+                                  <span className={`w-4 h-4 rounded-full ${member.color} text-white text-[8px] font-bold flex items-center justify-center`}>
+                                    {member.avatar}
+                                  </span>
+                                  @{task.assignee}
+                                </span>
+                                <span className="font-mono text-[10px] text-slate-600">
+                                  Venc: {(task.dueDate || '2026-10-30').split('-').reverse().join('/')}
+                                </span>
+                              </div>
+
+                              <div className="space-y-0.5 pt-0.5">
+                                <div className="flex items-center justify-between text-[10px] font-bold text-slate-600 tabular-nums">
+                                  <span>40 Filiais</span>
+                                  <span>{branchStats.ok + branchStats.na}/40 ({branchStats.percent}%)</span>
+                                </div>
+                                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-500" style={{ width: `${branchStats.percent}%` }} />
+                                </div>
+                              </div>
                             </div>
+
                             <div className="flex items-center gap-1 pt-1">
                               {task.status !== 'EM_ANDAMENTO' && task.status !== 'CONCLUIDA' && (
-                                <button onClick={() => handleStartTask(task)} className="flex-1 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer">
+                                <button
+                                  onClick={() => handleStartTask(task)}
+                                  className="flex-1 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                                >
                                   <Play className="w-3 h-3 fill-white" /> Iniciar
                                 </button>
                               )}
                               {task.status === 'EM_ANDAMENTO' && (
-                                <button onClick={() => openPauseModal(task)} className="flex-1 py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer">
+                                <button
+                                  onClick={() => openPauseModal(task)}
+                                  className="flex-1 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                                >
                                   <Pause className="w-3 h-3 fill-white" /> Pausar
                                 </button>
                               )}
-                              {task.status !== 'CONCLUIDA' && (
+                              {task.status !== 'CONCLUIDA' ? (
                                 <>
-                                  <button onClick={() => openTransferModal(task)} className="px-2 py-1.5 rounded bg-purple-100 hover:bg-purple-200 text-purple-800 text-[11px] font-bold cursor-pointer">@</button>
-                                  <button onClick={() => handleCompleteTask(task)} className="px-2 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer"><Check className="w-3 h-3" /></button>
+                                  <button
+                                    onClick={() => openTransferModal(task)}
+                                    className="px-2 py-1.5 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-800 text-[11px] font-bold cursor-pointer"
+                                    title="Transferir (@)"
+                                  >
+                                    @
+                                  </button>
+                                  <button
+                                    onClick={() => handleCompleteTask(task)}
+                                    className="px-2 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer"
+                                    title="Concluir"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                  </button>
                                 </>
+                              ) : (
+                                <button
+                                  onClick={() => handleReopenTask(task)}
+                                  className="flex-1 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                                >
+                                  <RotateCcw className="w-3 h-3" /> Reabrir
+                                </button>
                               )}
+                              <button
+                                onClick={() => setSelectedTaskId(task.id)}
+                                className="px-2 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold cursor-pointer"
+                                title="Abrir Detalhes e Checklist"
+                              >
+                                Abrir
+                              </button>
                             </div>
                           </div>
                         );
