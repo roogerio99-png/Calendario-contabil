@@ -33,12 +33,14 @@ service cloud.firestore {
     function isValidTask(data) {
       return data.keys().hasAll(['id', 'code', 'title', 'status', 'assignee', 'ownerUid']) &&
         data.keys().hasOnly([
-          'id', 'code', 'title', 'topic', 'accountingType', 'category', 'dueDate',
-          'assignee', 'originalAssignee', 'reviewer', 'status', 'isCritical',
-          'totalSeconds', 'timerStartedAt', 'activeTimerUser', 'activeTimerScope',
-          'activeTimerBranches', 'pauseReason', 'dependencyInfo', 'branches',
-          'branchDetails', 'checklistKey', 'checklistState', 'timeByUser',
-          'evidenceUrl', 'comments', 'completedAt', 'completedBy', 'ownerUid'
+          'id', 'templateId', 'code', 'department', 'group', 'subGroup', 'title',
+          'topic', 'accountingType', 'category', 'competenceType', 'competence',
+          'dueDate', 'recurrence', 'assignee', 'originalAssignee', 'reviewer',
+          'status', 'isCritical', 'totalSeconds', 'timerStartedAt', 'activeTimerUser',
+          'activeTimerScope', 'activeTimerBranches', 'pauseReason', 'dependencyInfo',
+          'branches', 'branchDetails', 'checklistKey', 'customChecklistItems',
+          'checklistState', 'timeByUser', 'evidenceUrl', 'comments',
+          'completedAt', 'completedBy', 'ownerUid'
         ]) &&
         data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
         data.code is string && data.code.size() >= 1 && data.code.size() <= 32 &&
@@ -46,6 +48,23 @@ service cloud.firestore {
         data.assignee is string && data.assignee.size() >= 1 && data.assignee.size() <= 64 &&
         data.status is string && data.status.size() <= 40 &&
         data.status in ['PENDENTE', 'EM_ANDAMENTO', 'PAUSADA', 'AGUARDANDO_DEPENDENCIA', 'CONCLUIDA'] &&
+        data.ownerUid is string && data.ownerUid.size() <= 128 &&
+        data.ownerUid == request.auth.uid;
+    }
+
+    function isValidTaskTemplate(data) {
+      return data.keys().hasAll(['id', 'standardCode', 'title', 'defaultAssignee', 'ownerUid']) &&
+        data.keys().hasOnly([
+          'id', 'standardCode', 'department', 'group', 'subGroup', 'title',
+          'topic', 'accountingType', 'defaultCompetenceType', 'defaultCompetence',
+          'defaultDueDate', 'recurrence', 'defaultAssignee', 'defaultReviewer',
+          'defaultCompanyScope', 'customBranches', 'isCritical', 'checklistKey',
+          'customChecklistItems', 'defaultEvidencePath', 'standardNotes', 'ownerUid'
+        ]) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.standardCode is string && data.standardCode.size() >= 1 && data.standardCode.size() <= 32 &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 500 &&
+        data.defaultAssignee is string && data.defaultAssignee.size() >= 1 && data.defaultAssignee.size() <= 64 &&
         data.ownerUid is string && data.ownerUid.size() <= 128 &&
         data.ownerUid == request.auth.uid;
     }
@@ -66,6 +85,24 @@ service cloud.firestore {
         data.ownerUid == request.auth.uid;
     }
 
+    function isValidTeamUser(data) {
+      return data.keys().hasAll(['id', 'name', 'category', 'role', 'department', 'status', 'ownerUid']) &&
+        data.keys().hasOnly([
+          'id', 'name', 'email', 'category', 'role', 'department', 'status',
+          'avatar', 'color', 'lightBg', 'textColor', 'borderColor', 'ownerUid'
+        ]) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+        data.category is string && data.category.size() <= 32 &&
+        data.category in ['ADMINISTRADOR', 'COORDENADOR', 'ANALISTA'] &&
+        data.role is string && data.role.size() >= 1 && data.role.size() <= 120 &&
+        data.department is string && data.department.size() >= 1 && data.department.size() <= 64 &&
+        data.status is string && data.status.size() <= 32 &&
+        data.status in ['ATIVO', 'INATIVO'] &&
+        data.ownerUid is string && data.ownerUid.size() <= 128 &&
+        data.ownerUid == request.auth.uid;
+    }
+
     // 3. Collection Rules: /tasks_10_2026/{taskId}
     match /tasks_10_2026/{taskId} {
       allow get: if isSignedIn() && isValidId(taskId) && (existing().ownerUid == request.auth.uid || isAdmin());
@@ -76,17 +113,37 @@ service cloud.firestore {
         incoming().code == existing().code &&
         (existing().ownerUid == request.auth.uid || isAdmin()) &&
         incoming().diff(existing()).affectedKeys().hasOnly([
-          'title', 'topic', 'accountingType', 'category', 'dueDate',
-          'assignee', 'originalAssignee', 'reviewer', 'status', 'isCritical',
-          'totalSeconds', 'timerStartedAt', 'activeTimerUser', 'activeTimerScope',
-          'activeTimerBranches', 'pauseReason', 'dependencyInfo', 'branches',
-          'branchDetails', 'checklistKey', 'checklistState', 'timeByUser',
-          'evidenceUrl', 'comments', 'completedAt', 'completedBy', 'ownerUid'
+          'templateId', 'department', 'group', 'subGroup', 'title', 'topic',
+          'accountingType', 'category', 'competenceType', 'competence', 'dueDate',
+          'recurrence', 'assignee', 'originalAssignee', 'reviewer', 'status',
+          'isCritical', 'totalSeconds', 'timerStartedAt', 'activeTimerUser',
+          'activeTimerScope', 'activeTimerBranches', 'pauseReason', 'dependencyInfo',
+          'branches', 'branchDetails', 'checklistKey', 'customChecklistItems',
+          'checklistState', 'timeByUser', 'evidenceUrl', 'comments',
+          'completedAt', 'completedBy', 'ownerUid'
         ]);
       allow delete: if isSignedIn() && isValidId(taskId) && (existing().ownerUid == request.auth.uid || isAdmin());
     }
 
-    // 4. Collection Rules: /logs_10_2026/{logId}
+    // 4. Collection Rules: /task_templates/{templateId}
+    match /task_templates/{templateId} {
+      allow get: if isSignedIn() && isValidId(templateId) && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidId(templateId) && isValidTaskTemplate(incoming()) && incoming().id == templateId;
+      allow update: if isSignedIn() && isValidId(templateId) && isValidTaskTemplate(incoming()) &&
+        incoming().id == existing().id &&
+        (existing().ownerUid == request.auth.uid || isAdmin()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'standardCode', 'department', 'group', 'subGroup', 'title', 'topic',
+          'accountingType', 'defaultCompetenceType', 'defaultCompetence',
+          'defaultDueDate', 'recurrence', 'defaultAssignee', 'defaultReviewer',
+          'defaultCompanyScope', 'customBranches', 'isCritical', 'checklistKey',
+          'customChecklistItems', 'defaultEvidencePath', 'standardNotes', 'ownerUid'
+        ]);
+      allow delete: if isSignedIn() && isValidId(templateId) && (existing().ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // 5. Collection Rules: /logs_10_2026/{logId}
     match /logs_10_2026/{logId} {
       allow get: if isSignedIn() && isValidId(logId) && (existing().ownerUid == request.auth.uid || isAdmin());
       allow list: if isSignedIn() && (existing().ownerUid == request.auth.uid || isAdmin());
@@ -95,7 +152,22 @@ service cloud.firestore {
       allow delete: if isAdmin() && isValidId(logId);
     }
 
-    // 5. Admins lookup collection
+    // 6. Collection Rules: /users_team/{userId}
+    match /users_team/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidId(userId) && isValidTeamUser(incoming()) && incoming().id == userId;
+      allow update: if isSignedIn() && isValidId(userId) && isValidTeamUser(incoming()) &&
+        incoming().id == existing().id &&
+        (existing().ownerUid == request.auth.uid || isAdmin()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'email', 'category', 'role', 'department', 'status',
+          'avatar', 'color', 'lightBg', 'textColor', 'borderColor', 'ownerUid'
+        ]);
+      allow delete: if isSignedIn() && isValidId(userId) && (existing().ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // 7. Admins lookup collection
     match /admins/{adminId} {
       allow get: if isSignedIn() && isValidId(adminId) && request.auth.uid == adminId;
       allow list, create, update, delete: if false;

@@ -2,7 +2,7 @@
   "entities": {
     "Task": {
       "title": "Task",
-      "description": "Accounting closing task or ad-hoc obligation tracked across 40 company branches.",
+      "description": "Accounting or fiscal obligation tracked across 40 company branches, segregated by department, group, sub-group, competence, due date, and recurrence.",
       "type": "object",
       "properties": {
         "id": {
@@ -11,24 +11,44 @@
           "maxLength": 128,
           "pattern": "^[a-zA-Z0-9_\\-]+$"
         },
+        "templateId": {
+          "type": "string",
+          "description": "Reference ID of the standard TaskTemplate used to create this task",
+          "maxLength": 128
+        },
         "code": {
           "type": "string",
-          "description": "Task short code (e.g., CTB-01, AVU-01)",
+          "description": "Task short code (e.g., CTB-01, FIS-01, AVU-01)",
           "maxLength": 32
+        },
+        "department": {
+          "type": "string",
+          "description": "Department responsible (e.g., Contábil, Fiscal)",
+          "maxLength": 64
+        },
+        "group": {
+          "type": "string",
+          "description": "Task group classification (e.g., Fechamento de resultado)",
+          "maxLength": 120
+        },
+        "subGroup": {
+          "type": "string",
+          "description": "Task sub-group classification (e.g., IFRS, Societário, ICMS/IPI)",
+          "maxLength": 120
         },
         "title": {
           "type": "string",
-          "description": "Task title or reconciliation description",
+          "description": "Task description (e.g., Amortização - SEGUROS (Imóveis e Veículos))",
           "maxLength": 500
         },
         "topic": {
           "type": "string",
-          "description": "Accounting topic classification",
+          "description": "Legacy topic alias synced with group",
           "maxLength": 120
         },
         "accountingType": {
           "type": "string",
-          "description": "Accounting standard (Societário, IFRS, Fiscal)",
+          "description": "Legacy accounting standard synced with subGroup",
           "maxLength": 64
         },
         "category": {
@@ -37,9 +57,26 @@
           "enum": ["FECHAMENTO", "AVULSA"],
           "maxLength": 32
         },
+        "competenceType": {
+          "type": "string",
+          "description": "Competence period type (MENSAL or ANUAL)",
+          "enum": ["MENSAL", "ANUAL"],
+          "maxLength": 32
+        },
+        "competence": {
+          "type": "string",
+          "description": "Competence identifier (e.g., 10/2026 or 2025)",
+          "maxLength": 32
+        },
         "dueDate": {
           "type": "string",
-          "description": "Due date in YYYY-MM-DD format",
+          "description": "Due date (vencimento) in YYYY-MM-DD format",
+          "maxLength": 32
+        },
+        "recurrence": {
+          "type": "string",
+          "description": "Task recurrence frequency (ESPORADICA, MENSAL, TRIMESTRAL, ANUAL)",
+          "enum": ["ESPORADICA", "MENSAL", "TRIMESTRAL", "ANUAL"],
           "maxLength": 32
         },
         "assignee": {
@@ -83,6 +120,116 @@
         }
       },
       "required": ["id", "code", "title", "status", "assignee"]
+    },
+    "TaskTemplate": {
+      "title": "TaskTemplate",
+      "description": "Standardized recurring task definition in the master task catalog, segregated by department, group, sub-group, competence, due date, and recurrence.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique template identifier",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "standardCode": {
+          "type": "string",
+          "description": "Standardized code for the recurring task (e.g., CTB-01, FIS-01)",
+          "maxLength": 32
+        },
+        "department": {
+          "type": "string",
+          "description": "Department responsible (e.g., Contábil, Fiscal)",
+          "maxLength": 64
+        },
+        "group": {
+          "type": "string",
+          "description": "Group classification (e.g., Fechamento de resultado)",
+          "maxLength": 120
+        },
+        "subGroup": {
+          "type": "string",
+          "description": "Sub-group classification (e.g., IFRS, Societário)",
+          "maxLength": 120
+        },
+        "title": {
+          "type": "string",
+          "description": "Standardized description of the task",
+          "maxLength": 500
+        },
+        "topic": {
+          "type": "string",
+          "description": "Accounting topic classification (synced with group)",
+          "maxLength": 120
+        },
+        "accountingType": {
+          "type": "string",
+          "description": "Accounting standard (synced with subGroup)",
+          "maxLength": 64
+        },
+        "defaultCompetenceType": {
+          "type": "string",
+          "description": "Default competence type (MENSAL or ANUAL)",
+          "enum": ["MENSAL", "ANUAL"],
+          "maxLength": 32
+        },
+        "defaultCompetence": {
+          "type": "string",
+          "description": "Default competence (e.g., 10/2026 or 2025)",
+          "maxLength": 32
+        },
+        "defaultDueDate": {
+          "type": "string",
+          "description": "Default due date (vencimento) in YYYY-MM-DD format",
+          "maxLength": 32
+        },
+        "recurrence": {
+          "type": "string",
+          "description": "Task recurrence frequency (ESPORADICA, MENSAL, TRIMESTRAL, ANUAL)",
+          "enum": ["ESPORADICA", "MENSAL", "TRIMESTRAL", "ANUAL"],
+          "maxLength": 32
+        },
+        "defaultAssignee": {
+          "type": "string",
+          "description": "Default responsible analyst",
+          "maxLength": 64
+        },
+        "defaultReviewer": {
+          "type": "string",
+          "description": "Default RACI reviewer",
+          "maxLength": 64
+        },
+        "defaultCompanyScope": {
+          "type": "string",
+          "description": "Default branch scope (ALL, MATRIZ_010101, HOLDING_040101, CUSTOM)",
+          "maxLength": 32
+        },
+        "isCritical": {
+          "type": "boolean",
+          "description": "Whether this recurring obligation is on the critical path"
+        },
+        "checklistKey": {
+          "type": "string",
+          "description": "Predefined checklist key if applicable",
+          "maxLength": 64
+        },
+        "defaultEvidencePath": {
+          "type": "string",
+          "description": "Standard folder/file path pattern for evidence",
+          "maxLength": 500
+        },
+        "standardNotes": {
+          "type": "string",
+          "description": "Standard operating procedure notes",
+          "maxLength": 1000
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner",
+          "maxLength": 128
+        }
+      },
+      "required": ["id", "standardCode", "title", "defaultAssignee"]
     },
     "AuditLog": {
       "title": "AuditLog",
@@ -142,16 +289,100 @@
         }
       },
       "required": ["id", "timestamp", "user", "taskCode", "type", "details"]
+    },
+    "TeamUser": {
+      "title": "TeamUser",
+      "description": "Registered user in the accounting and fiscal management system with 3 role categories: ADMINISTRADOR, COORDENADOR, or ANALISTA.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique user identifier / handle",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the user",
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "description": "Corporate email address",
+          "maxLength": 160
+        },
+        "category": {
+          "type": "string",
+          "description": "User access category (ADMINISTRADOR, COORDENADOR, ANALISTA)",
+          "enum": ["ADMINISTRADOR", "COORDENADOR", "ANALISTA"],
+          "maxLength": 32
+        },
+        "role": {
+          "type": "string",
+          "description": "Job title or function description",
+          "maxLength": 120
+        },
+        "department": {
+          "type": "string",
+          "description": "Department assignment (Contábil, Fiscal, Ambos)",
+          "maxLength": 64
+        },
+        "status": {
+          "type": "string",
+          "description": "User status (ATIVO or INATIVO)",
+          "enum": ["ATIVO", "INATIVO"],
+          "maxLength": 32
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Two-letter avatar initials",
+          "maxLength": 8
+        },
+        "color": {
+          "type": "string",
+          "description": "Tailwind background color class",
+          "maxLength": 64
+        },
+        "lightBg": {
+          "type": "string",
+          "description": "Tailwind light background color class",
+          "maxLength": 64
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Tailwind text color class",
+          "maxLength": 64
+        },
+        "borderColor": {
+          "type": "string",
+          "description": "Tailwind border color class",
+          "maxLength": 64
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner/creator",
+          "maxLength": 128
+        }
+      },
+      "required": ["id", "name", "category", "role", "department", "status"]
     }
   },
   "firestore": {
     "/tasks_10_2026/{taskId}": {
       "schema": { "$ref": "#/entities/Task" },
-      "description": "Accounting tasks for competency 10/2026 across 40 branches"
+      "description": "Accounting and fiscal tasks across 40 branches"
+    },
+    "/task_templates/{templateId}": {
+      "schema": { "$ref": "#/entities/TaskTemplate" },
+      "description": "Master catalog of standardized recurring tasks"
     },
     "/logs_10_2026/{logId}": {
       "schema": { "$ref": "#/entities/AuditLog" },
-      "description": "Audit trail logs for competency 10/2026"
+      "description": "Audit trail logs"
+    },
+    "/users_team/{userId}": {
+      "schema": { "$ref": "#/entities/TeamUser" },
+      "description": "Team members with ADMINISTRADOR, COORDENADOR, and ANALISTA categories"
     }
   }
 }
